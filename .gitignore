@@ -1,0 +1,11 @@
+TestData/*
+src/Version/*
+javafiles
+_t.bat
+build.bat
+config.bat
+_git_cmd.bat
+_gitk.bat
+*.bak
+_backup/
+/bin/

@@ -1,0 +1,3 @@
+[submodule "src/lippiWare/utils"]
+	path = src/lippiWare/utils
+	url = s:\\git\\utils.java
