@@ -18,15 +18,18 @@ public class IotTerminalMainPanel extends JPanel {
 
         JPanel upper = new JPanel();
         JPanel bottom = new JPanel();
-        verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upper, bottom);
+        JPanel logger = new JPanel();
+        horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, upper, logger);
+        verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, horizontalSplit, bottom);
+        horizontalSplit.setDividerLocation(IotTerminalPrefs.get("HorizontalSplit", 100));
         verticalSplit.setDividerLocation(IotTerminalPrefs.get("VerticalSplit", 100));
         add(verticalSplit);
     }
-    JSplitPane verticalSplit;
 
     public void saveWindowLayout() {
         dbg.println(9, "IotTerminalMainPanel.saveWindowLayout");
         IotTerminalPrefs.put("VerticalSplit", verticalSplit.getDividerLocation());
+        IotTerminalPrefs.put("HorizontalSplit", horizontalSplit.getDividerLocation());
     }
 
     @Override
@@ -40,5 +43,7 @@ public class IotTerminalMainPanel extends JPanel {
     }
 
     private JFrame parent;
+    JSplitPane verticalSplit;
+    JSplitPane horizontalSplit;
     private static final long serialVersionUID = 2561142532984581795L;
 }
