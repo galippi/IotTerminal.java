@@ -2,12 +2,35 @@ package IotTerminal;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
 import lippiWare.utils.dbg;
+
+class IotDataPanel extends JPanel {
+    IotDataPanel() {
+        
+    }
+
+    @Override
+    public void paintComponent(java.awt.Graphics g) {
+        super.paintComponent(g);
+        dbg.println(9, "IotDataPanel - paintComponent");
+        java.awt.Graphics2D g2 = (java.awt.Graphics2D)g;
+        int diagHeight = getHeight();
+        g.setColor(new Color(255, 70, 0));
+        g.fillRect(0, 0, getWidth(), diagHeight);
+        g.setColor(new Color(0, 0, 0));
+        g.drawString("AbCD", 30, 70);
+        g.setFont(new Font("Arial", Font.PLAIN, 40));
+        g.drawString("BaCD", 30, 170);
+    }
+
+    private static final long serialVersionUID = 960859627532168948L;
+}
 
 public class IotTerminalMainPanel extends JPanel {
 
@@ -16,7 +39,7 @@ public class IotTerminalMainPanel extends JPanel {
 
         parent = _parent;
 
-        JPanel upper = new JPanel();
+        JPanel upper = new IotDataPanel();
         JPanel bottom = new JPanel();
         JPanel logger = new JPanel();
         horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, upper, logger);
