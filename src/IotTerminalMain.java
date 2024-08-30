@@ -1,7 +1,9 @@
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 
+import IotTerminal.IotTerminalMainPanel;
 import IotTerminal.IotTerminalPrefs;
 import lippiWare.utils.dbg;
 
@@ -81,6 +83,9 @@ public class IotTerminalMain extends javax.swing.JFrame {
         jMenuBarMainMenu.add(jMenuFile);
 
         setJMenuBar(jMenuBarMainMenu);
+
+        JPanel jp = new IotTerminalMainPanel(this);
+        add(jp);
     }
 
     public void windowClose(java.awt.event.WindowEvent e)
