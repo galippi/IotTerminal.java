@@ -4,6 +4,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
+import iotDataConnection.IotDataConnection;
 import lippiWare.utils.dbg;
 
 public class IotTerminalMain extends javax.swing.JFrame {
@@ -62,7 +63,9 @@ public class IotTerminalMain extends javax.swing.JFrame {
         setLocation(IotTerminalPrefs.get("MainWindowX", 0), IotTerminalPrefs.get("MainWindowY", 0));
         setSize(IotTerminalPrefs.get("MainWindowW", 600), IotTerminalPrefs.get("MainWindowH", 400));
         setExtendedState(IotTerminalPrefs.get("MainWindowState", NORMAL));
+        iotDataConnection = new IotDataConnection(this);
     }
+    IotDataConnection iotDataConnection;
 
     private void initComponents() {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -85,6 +88,10 @@ public class IotTerminalMain extends javax.swing.JFrame {
 
         mainPanel = new IotTerminalMainPanel(this);
         add(mainPanel);
+    }
+
+    public void addLog(String msg) {
+        mainPanel.addLog(msg);
     }
 
     public void windowClose(java.awt.event.WindowEvent e)

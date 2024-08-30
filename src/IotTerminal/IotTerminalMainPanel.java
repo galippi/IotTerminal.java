@@ -7,6 +7,7 @@ import java.awt.Font;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 
 import lippiWare.utils.dbg;
 
@@ -41,12 +42,17 @@ public class IotTerminalMainPanel extends JPanel {
 
         JPanel upper = new IotDataPanel();
         JPanel bottom = new JPanel();
-        JPanel logger = new JPanel();
+        logger = new JTextArea();
         horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, upper, logger);
         verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, horizontalSplit, bottom);
         horizontalSplit.setDividerLocation(IotTerminalPrefs.get("HorizontalSplit", 100));
         verticalSplit.setDividerLocation(IotTerminalPrefs.get("VerticalSplit", 100));
         add(verticalSplit);
+    }
+    JTextArea logger;
+
+    public void addLog(String msg) {
+        logger.append(msg + "\n");
     }
 
     public void saveWindowLayout() {
