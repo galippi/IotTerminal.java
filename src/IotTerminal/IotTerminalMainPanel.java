@@ -18,8 +18,15 @@ public class IotTerminalMainPanel extends JPanel {
 
         JPanel upper = new JPanel();
         JPanel bottom = new JPanel();
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upper, bottom);
-        add(splitPane);
+        verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upper, bottom);
+        verticalSplit.setDividerLocation(IotTerminalPrefs.get("VerticalSplit", 100));
+        add(verticalSplit);
+    }
+    JSplitPane verticalSplit;
+
+    public void saveWindowLayout() {
+        dbg.println(9, "IotTerminalMainPanel.saveWindowLayout");
+        IotTerminalPrefs.put("VerticalSplit", verticalSplit.getDividerLocation());
     }
 
     @Override

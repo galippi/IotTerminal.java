@@ -83,8 +83,8 @@ public class IotTerminalMain extends javax.swing.JFrame {
 
         setJMenuBar(jMenuBarMainMenu);
 
-        JPanel jp = new IotTerminalMainPanel(this);
-        add(jp);
+        mainPanel = new IotTerminalMainPanel(this);
+        add(mainPanel);
     }
 
     public void windowClose(java.awt.event.WindowEvent e)
@@ -95,17 +95,19 @@ public class IotTerminalMain extends javax.swing.JFrame {
       IotTerminalPrefs.put("MainWindowH", getHeight());
       IotTerminalPrefs.put("MainWindowW", getWidth());
       IotTerminalPrefs.put("MainWindowState", getExtendedState());
-      //dataPanelMain.saveDataLayoutFile();
+      mainPanel.saveWindowLayout();
       System.exit(0);
     }
 
     private void m_FileExitActionPerformed(java.awt.event.ActionEvent evt) {
         dbg.println(9, "m_FileExitActionPerformed");
         dispose();
+        this.windowClose(null);
         System.exit(0);
       }
 
     static IotTerminalMain frame;
+    IotTerminalMainPanel mainPanel;
 
     private static final long serialVersionUID = -240137363597989690L;
 }
