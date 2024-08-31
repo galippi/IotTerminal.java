@@ -97,6 +97,8 @@ public class IotTerminalMain extends javax.swing.JFrame {
     public void windowClose(java.awt.event.WindowEvent e)
     {
       dbg.println(9, "windowClose");
+      iotDataConnection.close();
+      this.setVisible(false);
       IotTerminalPrefs.put("MainWindowX", getX());
       IotTerminalPrefs.put("MainWindowY", getY());
       IotTerminalPrefs.put("MainWindowH", getHeight());

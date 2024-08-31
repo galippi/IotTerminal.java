@@ -25,6 +25,10 @@ public class IotDataConnection implements ActionListener {
         t.restart();
     }
 
+    public void close() {
+        t.stop();
+    }
+
     Timer t;
     IotTerminalMain parent;
 }
