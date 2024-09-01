@@ -33,6 +33,35 @@ class IotDataPanel extends JPanel {
     private static final long serialVersionUID = 960859627532168948L;
 }
 
+class IotTerminalCommandEditor extends JPanel {
+    void setLayout() {
+        signalNameFilterText = new JTextField();
+        signalNameFilterText.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e)
+            {
+                dbg.println(11, "signalNameFilterText.insertUpdate=" + signalNameFilterText.getText());
+                signalVisibilityFilterIsChanged();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e)
+            {
+                dbg.println(11, "signalNameFilterText.removeUpdate=" + signalNameFilterText.getText());
+                signalVisibilityFilterIsChanged();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e)
+            {
+                dbg.println(11, "signalNameFilterText.changedUpdate=" + signalNameFilterText.getText());
+                signalVisibilityFilterIsChanged();
+            }
+        });
+    }
+    private static final long serialVersionUID = -3090462396850956564L;
+}
+
 public class IotTerminalMainPanel extends JPanel {
 
     public IotTerminalMainPanel(JFrame _parent) {
@@ -41,7 +70,7 @@ public class IotTerminalMainPanel extends JPanel {
         parent = _parent;
 
         JPanel upper = new IotDataPanel();
-        JPanel bottom = new JPanel();
+        JPanel bottom = new IotTerminalCommandEditor();
         logger = new JTextArea();
         horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, upper, logger);
         verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, horizontalSplit, bottom);
