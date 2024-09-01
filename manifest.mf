@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
 X-COMMENT: Main-Class will be added automatically by build
 Class-Path: . ../lib/json-20180813.jar
-Main-Class: IotTerminalMain
+Main-Class: IotTerminal.IotTerminalMain
