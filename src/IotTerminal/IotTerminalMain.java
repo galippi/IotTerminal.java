@@ -84,7 +84,12 @@ public class IotTerminalMain extends javax.swing.JFrame {
         });
         jMenuFile.add(m_FileExit);
 
+        JMenu jMenuHelp = new javax.swing.JMenu("Help");
+        JMenuItem m_HelpAbout = new javax.swing.JMenuItem("About");
+        jMenuHelp.add(m_HelpAbout);
+
         jMenuBarMainMenu.add(jMenuFile);
+        jMenuBarMainMenu.add(jMenuHelp);
 
         setJMenuBar(jMenuBarMainMenu);
 
@@ -96,6 +101,10 @@ public class IotTerminalMain extends javax.swing.JFrame {
 
     public void addLog(String msg) {
         mainPanel.addLog(msg);
+    }
+
+    public void sendIotCommand(String cmd) {
+        iotDataConnection.sendIotCommand(cmd);
     }
 
     public void windowClose(java.awt.event.WindowEvent e)

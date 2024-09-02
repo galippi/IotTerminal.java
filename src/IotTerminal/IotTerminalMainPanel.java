@@ -43,7 +43,8 @@ class IotDataPanel extends JPanel {
 }
 
 class IotTerminalCommandEditor extends JPanel {
-    IotTerminalCommandEditor() {
+    IotTerminalCommandEditor(IotTerminalMainPanel parent) {
+        this.parent = parent;
         setLayout();
     }
 
@@ -77,6 +78,7 @@ class IotTerminalCommandEditor extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dbg.println(11, "signalNameFilterText.actionPerformed=" + signalNameFilterText.getText() + " e=" + e.toString());
+                parent.sendIotCommand(signalNameFilterText.getText() + '\r');
             }
         });
         //Container cp = getContentPane();
@@ -93,25 +95,31 @@ class IotTerminalCommandEditor extends JPanel {
         //pack();
         this.setMinimumSize(new Dimension(200, 50));
     }
+
+    IotTerminalMainPanel parent;
     private static final long serialVersionUID = -3090462396850956564L;
 }
 
 public class IotTerminalMainPanel extends JPanel {
 
-    public IotTerminalMainPanel(JFrame _parent) {
+    public IotTerminalMainPanel(IotTerminalMain _parent) {
         super(new BorderLayout());
 
         parent = _parent;
 
         JPanel upper = new IotDataPanel();
-        JPanel bottom = new IotTerminalCommandEditor();
+        JPanel bottom = new IotTerminalCommandEditor(this);
         logger = new JTextArea();
+        logger.setEditable(false);
         horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, upper, logger);
         verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, horizontalSplit, bottom);
         horizontalSplit.setDividerLocation(IotTerminalPrefs.get("HorizontalSplit", 100));
         verticalSplit.setDividerLocation(IotTerminalPrefs.get("VerticalSplit", 100));
         add(verticalSplit);
         this.setMinimumSize(new Dimension(400, 300));
+    }
+    public void sendIotCommand(String cmd) {
+        parent.sendIotCommand(cmd);
     }
     JTextArea logger;
 
@@ -135,8 +143,9 @@ public class IotTerminalMainPanel extends JPanel {
         g.fillRect(0, 0, getWidth(), diagHeight);
     }
 
-    private JFrame parent;
+    private IotTerminalMain parent;
     JSplitPane verticalSplit;
     JSplitPane horizontalSplit;
+
     private static final long serialVersionUID = 2561142532984581795L;
 }

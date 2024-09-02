@@ -19,14 +19,19 @@ public class IotDataConnection implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent arg0) {
         dbg.println(9, "IotDataConnection.actionPerformed");
-        parent.addLog("bruhaha");
+        parent.addLog("Rx: " + "bruhaha");
         //t.setDelay(1000);
         t.setInitialDelay(1000);
-        t.restart();
+        //t.restart();
     }
 
     public void close() {
         t.stop();
+    }
+
+    public void sendIotCommand(String cmd) {
+        dbg.println(9, "IotDataConnection.sendIotCommand cmd=" + cmd);
+        parent.addLog("Tx: " + cmd);
     }
 
     Timer t;
