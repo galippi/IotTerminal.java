@@ -2,12 +2,21 @@ package IotTerminal;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SpringLayout;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import lippiWare.utils.dbg;
 
@@ -34,30 +43,55 @@ class IotDataPanel extends JPanel {
 }
 
 class IotTerminalCommandEditor extends JPanel {
+    IotTerminalCommandEditor() {
+        setLayout();
+    }
+
     void setLayout() {
-        signalNameFilterText = new JTextField();
+        JLabel jl = new JLabel("Command to device:");
+        JTextField signalNameFilterText = new JTextField();
         signalNameFilterText.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e)
             {
                 dbg.println(11, "signalNameFilterText.insertUpdate=" + signalNameFilterText.getText());
-                signalVisibilityFilterIsChanged();
+                //signalVisibilityFilterIsChanged();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e)
             {
                 dbg.println(11, "signalNameFilterText.removeUpdate=" + signalNameFilterText.getText());
-                signalVisibilityFilterIsChanged();
+                //signalVisibilityFilterIsChanged();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e)
             {
                 dbg.println(11, "signalNameFilterText.changedUpdate=" + signalNameFilterText.getText());
-                signalVisibilityFilterIsChanged();
+                //signalVisibilityFilterIsChanged();
             }
         });
+        signalNameFilterText.addActionListener(new ActionListener() {
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dbg.println(11, "signalNameFilterText.actionPerformed=" + signalNameFilterText.getText() + " e=" + e.toString());
+            }
+        });
+        //Container cp = getContentPane();
+        SpringLayout layout = new SpringLayout();
+        setLayout(layout);
+        add(jl);
+        add(signalNameFilterText);
+        layout.putConstraint(SpringLayout.NORTH, jl, 10, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST,  jl, 5, SpringLayout.WEST,  this);
+
+        layout.putConstraint(SpringLayout.NORTH, signalNameFilterText, -4, SpringLayout.NORTH, jl);
+        layout.putConstraint(SpringLayout.WEST,  signalNameFilterText, 5, SpringLayout.EAST,  jl);
+        layout.putConstraint(SpringLayout.EAST,  signalNameFilterText, -5, SpringLayout.EAST,  this);
+        //pack();
+        this.setMinimumSize(new Dimension(200, 50));
     }
     private static final long serialVersionUID = -3090462396850956564L;
 }
@@ -77,6 +111,7 @@ public class IotTerminalMainPanel extends JPanel {
         horizontalSplit.setDividerLocation(IotTerminalPrefs.get("HorizontalSplit", 100));
         verticalSplit.setDividerLocation(IotTerminalPrefs.get("VerticalSplit", 100));
         add(verticalSplit);
+        this.setMinimumSize(new Dimension(400, 300));
     }
     JTextArea logger;
 

@@ -1,4 +1,6 @@
 package IotTerminal;
+import java.awt.Dimension;
+
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -88,6 +90,8 @@ public class IotTerminalMain extends javax.swing.JFrame {
 
         mainPanel = new IotTerminalMainPanel(this);
         add(mainPanel);
+
+        this.setMinimumSize(new Dimension(400, 300));
     }
 
     public void addLog(String msg) {
