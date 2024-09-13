@@ -82,6 +82,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
         setSize(IotTerminalPrefs.get("MainWindowW", 600), IotTerminalPrefs.get("MainWindowH", 400));
         setExtendedState(IotTerminalPrefs.get("MainWindowState", NORMAL));
         ldp.addHandler(new IotVoltageHandler("U", 0.1, 0, mainPanel.getVoltageWindow()));
+        ldp.addHandler(new IotVoltageHandler("I", 0.1, 0, mainPanel.getCurrentWindow()));
         iotDataConnection = new IotDataConnection(this);
     }
     LogDataProcessor ldp = new LogDataProcessor();

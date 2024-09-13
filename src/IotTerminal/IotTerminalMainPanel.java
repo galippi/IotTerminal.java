@@ -2,14 +2,12 @@ package IotTerminal;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.BoxLayout;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -35,16 +33,20 @@ class IotGaugeVoltage extends JPanel {
         //java.awt.Graphics2D g2 = (java.awt.Graphics2D)g;
         int diagHeight = getHeight();
         int diagWidth = getWidth();
+        Font fontDefault = g.getFont();
         g.setColor(new Color(255, 70, 0));
         g.fillRect(0, 0, diagWidth, diagHeight);
         g.setColor(Color.BLACK);
-        g.drawRoundRect(0, 0, diagWidth, diagHeight, 15, 15);
+        g.drawRoundRect(0, 0, diagWidth - 1, diagHeight - 1, 15, 15);
         //g.drawRect(0, 0, diagWidth, diagHeight);
         g.setColor(Color.BLUE);
-        g.drawString("ctr=" + paintCtr, 30, 70);
-        g.setFont(new Font("Arial", Font.PLAIN, 40));
-        g.drawString("" + val + " V", 30, 170);
+        int fontSize = ((diagWidth < diagHeight) ? diagWidth : diagHeight) / 2;
+        g.setFont(new Font("Arial", Font.PLAIN, fontSize));
+        g.drawString("" + val + " V", 30, diagHeight - 20);
 
+        g.setColor(Color.BLACK);
+        g.setFont(fontDefault);
+        g.drawString("ctr=" + paintCtr, 30, 70);
         paintCtr++;
     }
 
@@ -183,6 +185,10 @@ public class IotTerminalMainPanel extends JPanel {
 
     public IotGaugeVoltage getVoltageWindow() {
         return upper.v0;
+    }
+
+    public IotGaugeVoltage getCurrentWindow() {
+        return upper.v1;
     }
 
     private IotTerminalMain parent;
