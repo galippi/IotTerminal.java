@@ -21,7 +21,11 @@ class IotDataDemoDataRecord {
 class IotDataDemo {
     IotDataDemo() {
         add(1000, "U0200");
-        add(1500, "I01A5");
+        add(0500, "I01A5");
+        add(1000, "U0170");
+        add(0500, "I0220");
+        add(1000, "U0150");
+        add(0500, "I0250");
     }
 
     private void add(int delay, String msg) {
