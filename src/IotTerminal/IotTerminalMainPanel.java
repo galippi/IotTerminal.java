@@ -8,6 +8,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -20,9 +21,44 @@ import javax.swing.event.DocumentListener;
 
 import lippiWare.utils.dbg;
 
+class IotGaugeVoltage extends JPanel {
+
+    public void setValue(double val) {
+        this.val = val;
+        this.repaint();
+    }
+
+    @Override
+    public void paintComponent(java.awt.Graphics g) {
+        super.paintComponent(g);
+        dbg.println(9, "IotGaugeVoltage - paintComponent");
+        //java.awt.Graphics2D g2 = (java.awt.Graphics2D)g;
+        int diagHeight = getHeight();
+        int diagWidth = getWidth();
+        g.setColor(new Color(255, 70, 0));
+        g.fillRect(0, 0, diagWidth, diagHeight);
+        g.setColor(Color.BLACK);
+        g.drawRoundRect(0, 0, diagWidth, diagHeight, 15, 15);
+        //g.drawRect(0, 0, diagWidth, diagHeight);
+        g.setColor(Color.BLUE);
+        g.drawString("ctr=" + paintCtr, 30, 70);
+        g.setFont(new Font("Arial", Font.PLAIN, 40));
+        g.drawString("" + val + " V", 30, 170);
+
+        paintCtr++;
+    }
+
+    private double val = Double.NaN;
+    int paintCtr = 0;
+
+    private static final long serialVersionUID = 364126482051139014L;
+}
+
 class IotDataPanel extends JPanel {
     IotDataPanel() {
-        
+        setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+        add(v0 = new IotGaugeVoltage());
+        add(v1 = new IotGaugeVoltage());
     }
 
     @Override
@@ -38,6 +74,8 @@ class IotDataPanel extends JPanel {
         g.setFont(new Font("Arial", Font.PLAIN, 40));
         g.drawString("BaCD", 30, 170);
     }
+
+    IotGaugeVoltage v0, v1;
 
     private static final long serialVersionUID = 960859627532168948L;
 }
@@ -107,7 +145,7 @@ public class IotTerminalMainPanel extends JPanel {
 
         parent = _parent;
 
-        JPanel upper = new IotDataPanel();
+        upper = new IotDataPanel();
         JPanel bottom = new IotTerminalCommandEditor(this);
         logger = new JTextArea();
         logger.setEditable(false);
@@ -118,10 +156,10 @@ public class IotTerminalMainPanel extends JPanel {
         add(verticalSplit);
         this.setMinimumSize(new Dimension(400, 300));
     }
+
     public void sendIotCommand(String cmd) {
         parent.sendIotCommand(cmd);
     }
-    JTextArea logger;
 
     public void addLog(String msg) {
         logger.append(msg + "\n");
@@ -143,9 +181,15 @@ public class IotTerminalMainPanel extends JPanel {
         g.fillRect(0, 0, getWidth(), diagHeight);
     }
 
+    public IotGaugeVoltage getVoltageWindow() {
+        return upper.v0;
+    }
+
     private IotTerminalMain parent;
     JSplitPane verticalSplit;
     JSplitPane horizontalSplit;
+    JTextArea logger;
+    IotDataPanel upper;
 
     private static final long serialVersionUID = 2561142532984581795L;
 }

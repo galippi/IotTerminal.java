@@ -1,13 +1,29 @@
 package IotTerminal;
+
 import java.awt.Dimension;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 
 import iotDataConnection.IotDataConnection;
 import lippiWare.utils.dbg;
+import lwLogDataProcessor.LogDataProcessor;
+import lwLogDataProcessor.LogDataProcessorDefaultHandler;
+import lwLogDataProcessor.LogDataProcessorHexu16Base;
+
+class IotVoltageHandler extends LogDataProcessorHexu16Base {
+    IotVoltageHandler(String prefix, double factor, double offset, IotGaugeVoltage parent) {
+        super(prefix);
+        this.parent = parent;
+    }
+
+    @Override
+    public void process(int data, String rest) {
+        parent.setValue(data * 0.1);
+    }
+    IotGaugeVoltage parent;
+}
 
 public class IotTerminalMain extends javax.swing.JFrame {
     public static void main(String[] args) {
@@ -65,8 +81,10 @@ public class IotTerminalMain extends javax.swing.JFrame {
         setLocation(IotTerminalPrefs.get("MainWindowX", 0), IotTerminalPrefs.get("MainWindowY", 0));
         setSize(IotTerminalPrefs.get("MainWindowW", 600), IotTerminalPrefs.get("MainWindowH", 400));
         setExtendedState(IotTerminalPrefs.get("MainWindowState", NORMAL));
+        ldp.addHandler(new IotVoltageHandler("U", 0.1, 0, mainPanel.getVoltageWindow()));
         iotDataConnection = new IotDataConnection(this);
     }
+    LogDataProcessor ldp = new LogDataProcessor();
     IotDataConnection iotDataConnection;
 
     private void initComponents() {
@@ -97,6 +115,12 @@ public class IotTerminalMain extends javax.swing.JFrame {
         add(mainPanel);
 
         this.setMinimumSize(new Dimension(400, 300));
+    }
+
+    LogDataProcessorDefaultHandler defaultHandler = new LogDataProcessorDefaultHandler();
+
+    public void processRxMessage(String rxMessage) {
+        ldp.process(rxMessage, defaultHandler);
     }
 
     public void addLog(String msg) {

@@ -2,27 +2,68 @@ package iotDataConnection;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Vector;
 
 import javax.swing.Timer;
 
 import IotTerminal.IotTerminalMain;
 import lippiWare.utils.dbg;
 
+class IotDataDemoDataRecord {
+    public IotDataDemoDataRecord(int delay, String msg) {
+        this.delay = delay;
+        data = msg;
+    }
+    int delay;
+    String data;
+}
+
+class IotDataDemo {
+    IotDataDemo() {
+        add(1000, "U0200");
+        add(1500, "I01A5");
+    }
+
+    private void add(int delay, String msg) {
+        data.add(new IotDataDemoDataRecord(delay, msg));
+    }
+
+    IotDataDemoDataRecord get() {
+        if (data.size() <= 0)
+            return null;
+        IotDataDemoDataRecord result = data.get(0);
+        data.removeElementAt(0);
+        return result;
+    }
+
+    Vector<IotDataDemoDataRecord> data = new Vector<>();
+}
+
 public class IotDataConnection implements ActionListener {
     public IotDataConnection(IotTerminalMain iotTerminalMain) {
         parent = iotTerminalMain;
-        t = new Timer(100, this);
+        t = new Timer(0, this);
         t.setRepeats(false);
+        scheduleMessage();
         t.start();
+    }
+
+    private void scheduleMessage() {
+        IotDataDemoDataRecord data = idd.get();
+        if (data != null) {
+            //t.setDelay(1000);
+            t.setInitialDelay(data.delay);
+            rxMessage = data.data;
+            t.restart();
+        }
     }
 
     @Override
     public void actionPerformed(ActionEvent arg0) {
         dbg.println(9, "IotDataConnection.actionPerformed");
-        parent.addLog("Rx: " + "bruhaha");
-        //t.setDelay(1000);
-        t.setInitialDelay(1000);
-        //t.restart();
+        parent.addLog("Rx: " + rxMessage);
+        parent.processRxMessage(rxMessage);
+        scheduleMessage();
     }
 
     public void close() {
@@ -36,4 +77,6 @@ public class IotDataConnection implements ActionListener {
 
     Timer t;
     IotTerminalMain parent;
+    IotDataDemo idd = new IotDataDemo();
+    private String rxMessage;
 }
