@@ -43,7 +43,7 @@ class IotDataDemo {
     Vector<IotDataDemoDataRecord> data = new Vector<>();
 }
 
-public class IotDataConnection implements ActionListener {
+public class IotDataConnection implements ActionListener, IotDataConnectionIf {
     public IotDataConnection(IotTerminalMain iotTerminalMain) {
         parent = iotTerminalMain;
         t = new Timer(0, this);
