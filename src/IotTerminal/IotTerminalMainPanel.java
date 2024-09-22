@@ -90,7 +90,7 @@ class IotTerminalCommandEditor extends JPanel {
 
     void setLayout() {
         JLabel jl = new JLabel("Command to device:");
-        JTextField signalNameFilterText = new JTextField();
+        signalNameFilterText = new JTextField();
         signalNameFilterText.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e)
@@ -137,6 +137,7 @@ class IotTerminalCommandEditor extends JPanel {
     }
 
     IotTerminalMainPanel parent;
+    JTextField signalNameFilterText;
     private static final long serialVersionUID = -3090462396850956564L;
 }
 
