@@ -42,7 +42,19 @@ class IotGaugeVoltage extends JPanel {
         g.setColor(Color.BLUE);
         int fontSize = ((diagWidth < diagHeight) ? diagWidth : diagHeight) / 2;
         g.setFont(new Font("Arial", Font.PLAIN, fontSize));
-        g.drawString("" + val + " V", 30, diagHeight - 20);
+        String valStr;
+        if (Double.isNaN(val)) {
+            valStr = "NaN      ";
+        }else{
+            valStr = "" + val;
+            if (valStr.length() > 5)
+                valStr = valStr.substring(0, 5);
+            else
+            if (valStr.length() < 5)
+                valStr = valStr + "00000".substring(valStr.length(), 5);
+            valStr = valStr + " V";
+        }
+        g.drawString(valStr, 30, diagHeight - 20);
 
         g.setColor(Color.BLACK);
         g.setFont(fontDefault);
