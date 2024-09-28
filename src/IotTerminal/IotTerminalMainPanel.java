@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -164,7 +165,7 @@ public class IotTerminalMainPanel extends JPanel {
         JPanel bottom = new IotTerminalCommandEditor(this);
         logger = new JTextArea();
         logger.setEditable(false);
-        horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, upper, logger);
+        horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, upper, new JScrollPane(logger));
         verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, horizontalSplit, bottom);
         horizontalSplit.setDividerLocation(IotTerminalPrefs.get("HorizontalSplit", 100));
         verticalSplit.setDividerLocation(IotTerminalPrefs.get("VerticalSplit", 100));
@@ -177,7 +178,9 @@ public class IotTerminalMainPanel extends JPanel {
     }
 
     public void addLog(String msg) {
-        logger.append(msg + "\n");
+        if (msg.charAt(msg.length() - 1) != '\n')
+            msg = msg + "\n";
+        logger.append(msg);
     }
 
     public void saveWindowLayout() {
