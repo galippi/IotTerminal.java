@@ -137,6 +137,7 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
     @Override
     public void rxCallback(byte[] data, int num) {
         String rxMessage = new String(data, 0, num);
+        addLog(rxMessage);
         rxMessage.replace('\r', '\n');
         if (!rxMessageIsInSync) {
             int idx = rxMessage.indexOf('\n');
