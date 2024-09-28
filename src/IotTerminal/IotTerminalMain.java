@@ -7,6 +7,9 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 import iotDataConnection.IotDataConnection;
+import iotDataConnection.IotDataConnectionIf;
+import iotDataConnection.IotDataConnectionSerial;
+import iotDataConnection.IotDataConnectionRxIf;
 import lippiWare.utils.dbg;
 import lwLogDataProcessor.LogDataProcessor;
 import lwLogDataProcessor.LogDataProcessorDefaultHandler;
@@ -16,16 +19,19 @@ class IotVoltageHandler extends LogDataProcessorHexu16Base {
     IotVoltageHandler(String prefix, double factor, double offset, IotGaugeVoltage parent) {
         super(prefix);
         this.parent = parent;
+        this.factor = factor;
+        this.offset = offset;
     }
 
     @Override
     public void process(int data, String rest) {
-        parent.setValue(data * 0.1);
+        parent.setValue((data * factor) + offset);
     }
     IotGaugeVoltage parent;
+    double factor, offset;
 }
 
-public class IotTerminalMain extends javax.swing.JFrame {
+public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnectionRxIf {
     public static void main(String[] args) {
         System.out.println("Haha");
 
@@ -81,12 +87,20 @@ public class IotTerminalMain extends javax.swing.JFrame {
         setLocation(IotTerminalPrefs.get("MainWindowX", 0), IotTerminalPrefs.get("MainWindowY", 0));
         setSize(IotTerminalPrefs.get("MainWindowW", 600), IotTerminalPrefs.get("MainWindowH", 400));
         setExtendedState(IotTerminalPrefs.get("MainWindowState", NORMAL));
-        ldp.addHandler(new IotVoltageHandler("U", 0.1, 0, mainPanel.getVoltageWindow()));
+        ldp.addHandler(new IotVoltageHandler("U0", 3.3/4096, 0, mainPanel.getVoltageWindow()));
         ldp.addHandler(new IotVoltageHandler("I", 0.1, 0, mainPanel.getCurrentWindow()));
-        iotDataConnection = new IotDataConnection(this);
+        //iotDataConnection = new IotDataConnection(this);
+        try {
+            //String path = System.getenv("PATH");
+            iotDataConnection = new IotDataConnectionSerial(this, "COM22");
+        } catch (Exception e) {
+            dbg.println(1, "IotTerminalMain.ctor exception e=" + e.toString());
+            //e.printStackTrace();
+            System.exit(1);
+        }
     }
     LogDataProcessor ldp = new LogDataProcessor();
-    IotDataConnection iotDataConnection;
+    IotDataConnectionIf iotDataConnection;
 
     private void initComponents() {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -119,6 +133,30 @@ public class IotTerminalMain extends javax.swing.JFrame {
     }
 
     LogDataProcessorDefaultHandler defaultHandler = new LogDataProcessorDefaultHandler();
+
+    @Override
+    public void rxCallback(byte[] data, int num) {
+        String rxMessage = new String(data, 0, num);
+        rxMessage.replace('\r', '\n');
+        if (!rxMessageIsInSync) {
+            int idx = rxMessage.indexOf('\n');
+            if (idx < 0)
+                return;
+            rxMessage = rxMessage.substring(idx + 1);
+            rxMessageIsInSync = true;
+        }
+        rxMessageRest = rxMessageRest + rxMessage;
+        int idx;
+        while ((idx = rxMessageRest.indexOf('\n')) >= 0) {
+            if (idx > 0) {
+                rxMessage = rxMessageRest.substring(0, idx);
+                ldp.process(rxMessage, defaultHandler);
+            }
+            rxMessageRest = rxMessageRest.substring(idx + 1);
+        }
+    }
+    boolean rxMessageIsInSync = false;
+    String rxMessageRest = "";
 
     public void processRxMessage(String rxMessage) {
         ldp.process(rxMessage, defaultHandler);
