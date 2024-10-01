@@ -30,7 +30,7 @@ class IotGaugeVoltage extends JPanel {
     @Override
     public void paintComponent(java.awt.Graphics g) {
         super.paintComponent(g);
-        dbg.println(9, "IotGaugeVoltage - paintComponent");
+        dbg.println(9, "IotGaugeVoltage - paintComponent " + (Object)this);
         //java.awt.Graphics2D g2 = (java.awt.Graphics2D)g;
         int diagHeight = getHeight();
         int diagWidth = getWidth();
@@ -63,7 +63,108 @@ class IotGaugeVoltage extends JPanel {
         paintCtr++;
     }
 
-    private double val = Double.NaN;
+    protected double val = Double.NaN;
+    int paintCtr = 0;
+
+    private static final long serialVersionUID = 364126482051139014L;
+}
+
+class IotGaugeCurrent extends IotGaugeVoltage {
+    @Override
+    public void paintComponent(java.awt.Graphics g) {
+        //super.paintComponent(g);
+        dbg.println(9, "IotGaugeCurrent - paintComponent " + (Object)this);
+
+        int diagHeight = getHeight();
+        int diagWidth = getWidth();
+        Font fontDefault = g.getFont();
+        g.setColor(new Color(255, 130, 0));
+        g.fillRect(0, 0, diagWidth, diagHeight);
+        g.setColor(Color.BLACK);
+        g.drawRoundRect(0, 0, diagWidth - 1, diagHeight - 1, 15, 15);
+        //g.drawRect(0, 0, diagWidth, diagHeight);
+        g.setColor(Color.BLUE);
+        int fontSize = ((diagWidth < diagHeight) ? diagWidth : diagHeight) / 2;
+        g.setFont(new Font("Arial", Font.PLAIN, fontSize));
+
+        String valStr;
+        if (Double.isNaN(val)) {
+            valStr = "NaN       ";
+        }else{
+            double valSigned = val;
+            if (valSigned > 0x7F00)
+                valSigned = valSigned - 0x10000;
+            valStr = "" + (int)(valSigned * (3.3 * 1000 / 2.7 / 4096));
+            //valStr = "" + (int)valSigned;
+            if (valStr.length() > 5)
+                valStr = valStr.substring(0, 5);
+            else
+            if (valStr.length() < 5)
+                valStr = "     ".substring(valStr.length(), 5) + valStr;
+            valStr = valStr + " mA";
+        }
+        g.drawString(valStr, 30, diagHeight - 20);
+
+        g.setColor(Color.BLACK);
+        g.setFont(fontDefault);
+        g.drawString("ctr=" + paintCtr, 30, 70);
+        paintCtr++;
+    }
+
+    private static final long serialVersionUID = 9068897958698386929L;
+}
+
+class IotGaugeDht11 extends JPanel {
+
+    public void setValue(byte[] data) {
+        this.data = data;
+        this.repaint();
+    }
+
+    byte[] data;
+
+    @Override
+    public void paintComponent(java.awt.Graphics g) {
+        super.paintComponent(g);
+        dbg.println(9, "IotGaugeDht11 - paintComponent " + (Object)this);
+        //java.awt.Graphics2D g2 = (java.awt.Graphics2D)g;
+        int diagHeight = getHeight();
+        int diagWidth = getWidth();
+        Font fontDefault = g.getFont();
+        g.setColor(new Color(255, 70, 0));
+        g.fillRect(0, 0, diagWidth, diagHeight);
+        g.setColor(Color.BLACK);
+        g.drawRoundRect(0, 0, diagWidth - 1, diagHeight - 1, 15, 15);
+        //g.drawRect(0, 0, diagWidth, diagHeight);
+        g.setColor(Color.BLUE);
+        int fontSize = ((diagWidth < diagHeight) ? diagWidth : diagHeight) / 2;
+        g.setFont(new Font("Arial", Font.PLAIN, fontSize));
+        String valStr;
+        if (data == null) {
+            valStr = "NaN      ";
+        }else
+        if (data.length != 6) {
+            valStr = "NaN (" + data.length + ")";
+        }else{
+            int t         = toInt(data[0]) * 256 + toInt(data[1]);
+            int hummidity = toInt(data[2]) * 256 + toInt(data[3]);
+            int dataCtr   = toInt(data[4]);
+            int errCtr    = toInt(data[5]);
+            valStr = "" + (t / 10) + "." + (t % 10) + "C " + 
+                          (hummidity / 10) + "." + (hummidity % 10) + "% " + dataCtr + " " + errCtr;
+        }
+        g.drawString(valStr, 30, diagHeight - 20);
+
+        g.setColor(Color.BLACK);
+        g.setFont(fontDefault);
+        g.drawString("ctr=" + paintCtr, 30, 70);
+        paintCtr++;
+    }
+
+    int toInt(byte b) {
+        return (int)(b & 0xFF);
+    }
+    protected double val = Double.NaN;
     int paintCtr = 0;
 
     private static final long serialVersionUID = 364126482051139014L;
@@ -74,6 +175,8 @@ class IotDataPanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         add(v0 = new IotGaugeVoltage());
         add(v1 = new IotGaugeVoltage());
+        add(i0 = new IotGaugeCurrent());
+        add(dht = new IotGaugeDht11());
     }
 
     @Override
@@ -91,6 +194,8 @@ class IotDataPanel extends JPanel {
     }
 
     IotGaugeVoltage v0, v1;
+    IotGaugeCurrent i0;
+    IotGaugeDht11 dht;
 
     private static final long serialVersionUID = 960859627532168948L;
 }
@@ -193,18 +298,26 @@ public class IotTerminalMainPanel extends JPanel {
     public void paintComponent(java.awt.Graphics g) {
         super.paintComponent(g);
         dbg.println(9, "IotTerminalMainPanel - paintComponent");
-        java.awt.Graphics2D g2 = (java.awt.Graphics2D)g;
+        //java.awt.Graphics2D g2 = (java.awt.Graphics2D)g;
         int diagHeight = getHeight();
         g.setColor(new Color(255, 100, 0));
         g.fillRect(0, 0, getWidth(), diagHeight);
     }
 
-    public IotGaugeVoltage getVoltageWindow() {
+    public IotGaugeVoltage getVoltage0Window() {
         return upper.v0;
     }
 
-    public IotGaugeVoltage getCurrentWindow() {
+    public IotGaugeVoltage getVoltage1Window() {
         return upper.v1;
+    }
+
+    public IotGaugeVoltage getCurrentWindow() {
+        return upper.i0;
+    }
+
+    public IotGaugeDht11 getDht11Window() {
+        return upper.dht;
     }
 
     private IotTerminalMain parent;

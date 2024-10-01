@@ -84,7 +84,7 @@ public class IotDataConnectionSerial implements IotDataConnectionIf, ActionListe
         }
     }
 
-    static public int rxRepeatTime = 100; // in ms
+    static public int rxRepeatTime = 150; // in ms
     Timer t;
     SerialPort serialPort;
     OutputStream outStream;
