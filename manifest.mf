@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
 X-COMMENT: Main-Class will be added automatically by build
-Class-Path: . ../lib/json-20180813.jar
+Class-Path: . ../lib/RXTXcomm/RXTXcomm.jar ./lib/RXTXcomm/RXTXcomm.jar
 Main-Class: IotTerminal.IotTerminalMain
