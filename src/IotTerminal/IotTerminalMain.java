@@ -7,6 +7,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
+import config.DbgConfig;
 import iotDataConnection.IotDataConnection;
 import iotDataConnection.IotDataConnectionIf;
 import iotDataConnection.IotDataConnectionSerial;
@@ -50,10 +51,8 @@ class IotDht11Handler extends LogDataProcessorHexu8ArrayBase {
 
 public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnectionRxIf {
     public static void main(String[] args) {
-        System.out.println("Haha");
-
         //dbg.set(IotTerminalPrefs.get("Debug level", 1));
-        dbg.setLevelMask(0x3F);
+        dbg.setLevelMask(DbgConfig.dbgLevelMask);
         dbg.set(0x3F);
 
         /* Set the Nimbus look and feel */

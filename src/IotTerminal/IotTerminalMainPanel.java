@@ -18,6 +18,7 @@ import javax.swing.SpringLayout;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import config.DbgConfig;
 import lippiWare.utils.dbg;
 
 class IotGaugeVoltage extends JPanel {
@@ -30,7 +31,7 @@ class IotGaugeVoltage extends JPanel {
     @Override
     public void paintComponent(java.awt.Graphics g) {
         super.paintComponent(g);
-        dbg.println(9, "IotGaugeVoltage - paintComponent " + (Object)this);
+        dbg.println(DbgConfig.dbgLevelMaskGui | 9, "IotGaugeVoltage - paintComponent " + (Object)this);
         //java.awt.Graphics2D g2 = (java.awt.Graphics2D)g;
         int diagHeight = getHeight();
         int diagWidth = getWidth();
@@ -73,7 +74,7 @@ class IotGaugeCurrent extends IotGaugeVoltage {
     @Override
     public void paintComponent(java.awt.Graphics g) {
         //super.paintComponent(g);
-        dbg.println(9, "IotGaugeCurrent - paintComponent " + (Object)this);
+        dbg.println(DbgConfig.dbgLevelMaskGui | 9, "IotGaugeCurrent - paintComponent " + (Object)this);
 
         int diagHeight = getHeight();
         int diagWidth = getWidth();
@@ -126,7 +127,7 @@ class IotGaugeDht11 extends JPanel {
     @Override
     public void paintComponent(java.awt.Graphics g) {
         super.paintComponent(g);
-        dbg.println(9, "IotGaugeDht11 - paintComponent " + (Object)this);
+        dbg.println(DbgConfig.dbgLevelMaskGui | 9, "IotGaugeDht11 - paintComponent " + (Object)this);
         //java.awt.Graphics2D g2 = (java.awt.Graphics2D)g;
         int diagHeight = getHeight();
         int diagWidth = getWidth();
@@ -182,7 +183,7 @@ class IotDataPanel extends JPanel {
     @Override
     public void paintComponent(java.awt.Graphics g) {
         super.paintComponent(g);
-        dbg.println(9, "IotDataPanel - paintComponent");
+        dbg.println(DbgConfig.dbgLevelMaskGui | 9, "IotDataPanel - paintComponent");
         java.awt.Graphics2D g2 = (java.awt.Graphics2D)g;
         int diagHeight = getHeight();
         g.setColor(new Color(255, 70, 0));
@@ -297,7 +298,7 @@ public class IotTerminalMainPanel extends JPanel {
     @Override
     public void paintComponent(java.awt.Graphics g) {
         super.paintComponent(g);
-        dbg.println(9, "IotTerminalMainPanel - paintComponent");
+        dbg.println(DbgConfig.dbgLevelMaskGui | 9, "IotTerminalMainPanel - paintComponent");
         //java.awt.Graphics2D g2 = (java.awt.Graphics2D)g;
         int diagHeight = getHeight();
         g.setColor(new Color(255, 100, 0));
