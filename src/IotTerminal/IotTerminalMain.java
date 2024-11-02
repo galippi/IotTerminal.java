@@ -1,6 +1,7 @@
 package IotTerminal;
 
 import java.awt.Dimension;
+import java.nio.charset.Charset;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -10,6 +11,7 @@ import iotDataConnection.IotDataConnection;
 import iotDataConnection.IotDataConnectionIf;
 import iotDataConnection.IotDataConnectionSerial;
 import iotDataConnection.IotDataConnectionRxIf;
+import lippiWare.utils.bin;
 import lippiWare.utils.dbg;
 import lwLogDataProcessor.LogDataProcessor;
 import lwLogDataProcessor.LogDataProcessorDefaultHandler;
@@ -51,7 +53,8 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
         System.out.println("Haha");
 
         //dbg.set(IotTerminalPrefs.get("Debug level", 1));
-        dbg.set(99);
+        dbg.setLevelMask(0x3F);
+        dbg.set(0x3F);
 
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -154,7 +157,13 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
     @Override
     public void rxCallback(byte[] data, int num) {
         String rxMessage = new String(data, 0, num);
+        //String rxMessage = new String(data, 0, num, Charset.forName("US-ASCII"));
         addLog(rxMessage);
+        if (false) {
+            String str = bin.toString(data, num);
+            addLog(str + "\n");
+            dbg.println(11, "rxCallback str=" + str);
+        }
         rxMessage = rxMessage.replace('\r', '\n');
         if (!rxMessageIsInSync) {
             int idx = rxMessage.indexOf('\n');
