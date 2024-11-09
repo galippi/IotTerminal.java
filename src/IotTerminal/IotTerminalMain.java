@@ -53,7 +53,8 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
     public static void main(String[] args) {
         //dbg.set(IotTerminalPrefs.get("Debug level", 1));
         dbg.setLevelMask(DbgConfig.dbgLevelMask);
-        dbg.set(0x3F);
+        int level = IotTerminalPrefs.get("Debug level", 0x3F);
+        dbg.set(level);
 
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -111,7 +112,7 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
         //iotDataConnection = new IotDataConnection(this);
         try {
             //String path = System.getenv("PATH");
-            iotDataConnection = new IotDataConnectionSerial(this, "COM22");
+            iotDataConnection = new IotDataConnectionSerial(this);
         } catch (Exception e) {
             dbg.println(1, "IotTerminalMain.ctor exception e=" + e.toString());
             //e.printStackTrace();
@@ -136,11 +137,21 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
         });
         jMenuFile.add(m_FileExit);
 
+        JMenu jMenuTools = new javax.swing.JMenu("Tools");
+        JMenuItem m_ToolsOptions = new javax.swing.JMenuItem("Options");
+        jMenuTools.add(m_ToolsOptions);
+        m_ToolsOptions.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+              m_ToolsOptionsActionPerformed(evt);
+            }
+          });
+
         JMenu jMenuHelp = new javax.swing.JMenu("Help");
         JMenuItem m_HelpAbout = new javax.swing.JMenuItem("About");
         jMenuHelp.add(m_HelpAbout);
 
         jMenuBarMainMenu.add(jMenuFile);
+        jMenuBarMainMenu.add(jMenuTools);
         jMenuBarMainMenu.add(jMenuHelp);
 
         setJMenuBar(jMenuBarMainMenu);
@@ -216,6 +227,12 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
         dispose();
         this.windowClose(null);
         System.exit(0);
+      }
+
+    private void m_ToolsOptionsActionPerformed(java.awt.event.ActionEvent evt) {
+        dbg.println(9, "m_ToolsOptionsActionPerformed");
+        OptionsDialog od = new OptionsDialog(this);
+        od.setVisible(true);
       }
 
     static IotTerminalMain frame;

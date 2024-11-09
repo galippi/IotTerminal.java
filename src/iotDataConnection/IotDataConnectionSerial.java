@@ -9,21 +9,22 @@ import java.io.OutputStream;
 import javax.swing.Timer;
 
 import gnu.io.*;
-
+import lippiWare.utils.bin;
 import lippiWare.utils.dbg;
 
 public class IotDataConnectionSerial implements IotDataConnectionIf, ActionListener {
-    public IotDataConnectionSerial(IotDataConnectionRxIf parent, String portName) throws Exception {
+    public IotDataConnectionSerial(IotDataConnectionRxIf parent) throws Exception {
         this.parent = parent;
+        new IotComPort(this);
+        String portName = IotComPort.getPortName();
         try
         {
             CommPortIdentifier portId =
                     CommPortIdentifier.getPortIdentifier(portName);
           serialPort = (SerialPort) portId.open("IOT", 5000);
-          int baudRate = 115200;
           // Set serial port to 115200bps-8N1
           serialPort.setSerialPortParams(
-              baudRate,
+                  IotComPort.getBaudRate(),
               SerialPort.DATABITS_8,
               SerialPort.STOPBITS_1,
               SerialPort.PARITY_NONE);
@@ -54,7 +55,10 @@ public class IotDataConnectionSerial implements IotDataConnectionIf, ActionListe
     @Override
     public void sendIotCommand(String cmd) {
         try {
-            outStream.write(cmd.getBytes());
+            byte[] cmdData = cmd.getBytes();
+            outStream.write(cmdData);
+            dbg.println(9, "IotDataConnectionSerial.sendIotCommand tx=" + cmd);
+            dbg.println(11, "IotDataConnectionSerial.sendIotCommand str=" + bin.toString(cmdData));
         } catch (IOException e) {
             dbg.println(1, "IotDataConnectionSerial.sendIotCommand exception e=" + e.toString());
             //e.printStackTrace();
@@ -63,7 +67,17 @@ public class IotDataConnectionSerial implements IotDataConnectionIf, ActionListe
 
     @Override
     public void close() {
+        try {
+            inStream.close();
+            outStream.close();
+        } catch (IOException e) {
+            dbg.println(1, "IotDataConnectionSerial.close exception e=" + e.toString());
+            e.printStackTrace();
+        }
+        inStream = null;
+        outStream = null;
         serialPort.close();
+        serialPort = null;
     }
 
     @Override
@@ -71,7 +85,8 @@ public class IotDataConnectionSerial implements IotDataConnectionIf, ActionListe
         DataBufferItem buffer = dbh.get(64);
         try {
             int num = inStream.read(buffer.get());
-            dbg.println(19, "IotDataConnectionSerial.actionPerformed num=" + num);
+            if (num != 0)
+                dbg.println(19, "IotDataConnectionSerial.actionPerformed num=" + num);
             if (num <= 0) {
                 buffer.release();
                 return;
