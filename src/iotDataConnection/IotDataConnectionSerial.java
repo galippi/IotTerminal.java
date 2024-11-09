@@ -47,7 +47,7 @@ public class IotDataConnectionSerial implements IotDataConnectionIf, ActionListe
         {
             throw new Exception("IotDataConnectionSerial - IOException portName=" + portName);
         }
-        t = new Timer(rxRepeatTime, this);
+        t = new Timer(IotComPort.getPollingTime(), this); // polling time in ms
         t.setRepeats(true);
         t.start();
     }
@@ -99,7 +99,6 @@ public class IotDataConnectionSerial implements IotDataConnectionIf, ActionListe
         }
     }
 
-    static public int rxRepeatTime = 150; // in ms
     Timer t;
     SerialPort serialPort;
     OutputStream outStream;
