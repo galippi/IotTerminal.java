@@ -94,9 +94,10 @@ class IotGaugeCurrent extends IotGaugeVoltage {
             valStr = "NaN       ";
         }else{
             double valSigned = val;
-            if (valSigned > 0x7F00)
+            if (valSigned > 0x7FFF)
                 valSigned = valSigned - 0x10000;
-            valStr = "" + (int)(valSigned * (3.3 * 1000 / 2.7 / 4096));
+            //valStr = "" + (int)(valSigned * (3.3 * 1000 / 2.7 / 4096));
+            valStr = "" + (int)(valSigned);
             //valStr = "" + (int)valSigned;
             if (valStr.length() > 5)
                 valStr = valStr.substring(0, 5);
@@ -175,7 +176,7 @@ class IotGaugeDht11 extends JPanel {
 class IotGaugeString extends JPanel {
 
     public void setValue(String val) {
-        this.val = "DBG00:" + val;
+        this.val = val;
         this.repaint();
     }
 
