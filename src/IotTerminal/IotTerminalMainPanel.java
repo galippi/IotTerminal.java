@@ -19,6 +19,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import config.DbgConfig;
+import lippiWare.utils.bin;
 import lippiWare.utils.dbg;
 
 class IotGaugeVoltage extends JPanel {
@@ -171,6 +172,43 @@ class IotGaugeDht11 extends JPanel {
     private static final long serialVersionUID = 364126482051139014L;
 }
 
+class IotGaugeString extends JPanel {
+
+    public void setValue(String val) {
+        this.val = "DBG00:" + val;
+        this.repaint();
+    }
+
+    @Override
+    public void paintComponent(java.awt.Graphics g) {
+        super.paintComponent(g);
+        dbg.println(DbgConfig.dbgLevelMaskGui | 9, "IotGaugeString - paintComponent " + (Object)this);
+        //java.awt.Graphics2D g2 = (java.awt.Graphics2D)g;
+        int diagHeight = getHeight();
+        int diagWidth = getWidth();
+        Font fontDefault = g.getFont();
+        g.setColor(new Color(255, 70, 0));
+        g.fillRect(0, 0, diagWidth, diagHeight);
+        g.setColor(Color.BLACK);
+        g.drawRoundRect(0, 0, diagWidth - 1, diagHeight - 1, 15, 15);
+        //g.drawRect(0, 0, diagWidth, diagHeight);
+        g.setColor(Color.BLUE);
+        int fontSize = ((diagWidth < diagHeight) ? diagWidth : diagHeight) / 2;
+        g.setFont(new Font("Arial", Font.PLAIN, fontSize));
+        g.drawString(val, 30, diagHeight - 20);
+
+        g.setColor(Color.BLACK);
+        g.setFont(fontDefault);
+        g.drawString("ctr=" + paintCtr, 30, 70);
+        paintCtr++;
+    }
+
+    protected String val = "-";
+    int paintCtr = 0;
+
+    private static final long serialVersionUID = 364126486431139014L;
+}
+
 class IotDataPanel extends JPanel {
     IotDataPanel() {
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -178,6 +216,7 @@ class IotDataPanel extends JPanel {
         add(v1 = new IotGaugeVoltage());
         add(i0 = new IotGaugeCurrent());
         add(dht = new IotGaugeDht11());
+        add(dbg00 = new IotGaugeString());
     }
 
     @Override
@@ -197,6 +236,7 @@ class IotDataPanel extends JPanel {
     IotGaugeVoltage v0, v1;
     IotGaugeCurrent i0;
     IotGaugeDht11 dht;
+    IotGaugeString dbg00;
 
     private static final long serialVersionUID = 960859627532168948L;
 }
@@ -319,6 +359,10 @@ public class IotTerminalMainPanel extends JPanel {
 
     public IotGaugeDht11 getDht11Window() {
         return upper.dht;
+    }
+
+    public IotGaugeString getDbg00Window() {
+        return upper.dbg00;
     }
 
     private IotTerminalMain parent;

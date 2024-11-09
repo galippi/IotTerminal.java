@@ -16,6 +16,7 @@ import lippiWare.utils.bin;
 import lippiWare.utils.dbg;
 import lwLogDataProcessor.LogDataProcessor;
 import lwLogDataProcessor.LogDataProcessorDefaultHandler;
+import lwLogDataProcessor.LogDataProcessorHandlerBase;
 import lwLogDataProcessor.LogDataProcessorHexu16Base;
 import lwLogDataProcessor.LogDataProcessorHexu8ArrayBase;
 
@@ -47,6 +48,20 @@ class IotDht11Handler extends LogDataProcessorHexu8ArrayBase {
     }
 
     IotGaugeDht11 parent;
+}
+
+class IotDbg00Handler extends LogDataProcessorHandlerBase {
+    IotDbg00Handler(String prefix, IotGaugeString parent) {
+        super(prefix);
+        this.parent = parent;
+    }
+
+    @Override
+    public void process(String data) {
+        parent.setValue(data);
+    }
+
+    IotGaugeString parent;
 }
 
 public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnectionRxIf {
@@ -109,6 +124,7 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
         ldp.addHandler(new IotVoltageHandler("U1", 3.3/4096, 0, mainPanel.getVoltage1Window()));
         ldp.addHandler(new IotVoltageHandler("I", 1, 0, mainPanel.getCurrentWindow()));
         ldp.addHandler(new IotDht11Handler("DHT", mainPanel.getDht11Window()));
+        ldp.addHandler(new IotDbg00Handler("DBG00", mainPanel.getDbg00Window()));
         //iotDataConnection = new IotDataConnection(this);
         try {
             //String path = System.getenv("PATH");
