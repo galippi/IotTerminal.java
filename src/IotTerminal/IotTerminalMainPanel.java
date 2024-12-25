@@ -15,6 +15,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
+import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -22,11 +23,24 @@ import config.DbgConfig;
 import lippiWare.utils.bin;
 import lippiWare.utils.dbg;
 
-class IotGaugeVoltage extends JPanel {
+class IotGaugeVoltage extends JPanel implements ActionListener {
+
+    public IotGaugeVoltage()
+    {
+        t = new Timer(1000, this); // polling time in ms
+        t.setRepeats(false);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        val = Double.NaN;
+        this.repaint();
+    }
 
     public void setValue(double val) {
         this.val = val;
         this.repaint();
+        t.restart();
     }
 
     @Override
@@ -67,6 +81,7 @@ class IotGaugeVoltage extends JPanel {
 
     protected double val = Double.NaN;
     int paintCtr = 0;
+    Timer t;
 
     private static final long serialVersionUID = 364126482051139014L;
 }
