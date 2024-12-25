@@ -16,6 +16,13 @@ public class IotDataConnectionSerial implements IotDataConnectionIf, ActionListe
     public IotDataConnectionSerial(IotDataConnectionRxIf parent) throws Exception {
         this.parent = parent;
         new IotComPort(this);
+        t = new Timer(1000, this); // polling time in ms
+        t.setRepeats(true);
+        reinit();
+    }
+
+    void open()
+    {
         String portName = IotComPort.getPortName();
         try
         {
@@ -34,22 +41,21 @@ public class IotDataConnectionSerial implements IotDataConnectionIf, ActionListe
           dbg.println(19, "IotDataConnectionSerial After setFlowControlMode");
           outStream = serialPort.getOutputStream();
           inStream = serialPort.getInputStream();
+          return;
         }catch (NoSuchPortException e)
         {
-            throw new Exception("IotDataConnectionSerial - NoSuchPortException portName=" + portName);
+            dbg.println(3, "IotDataConnectionSerial - NoSuchPortException portName=" + portName);
         }catch (PortInUseException e)
         {
-            throw new Exception("IotDataConnectionSerial - PortInUseException portName=" + portName);
+            dbg.println(3, "IotDataConnectionSerial - PortInUseException portName=" + portName);
         }catch (UnsupportedCommOperationException e)
         {
-            throw new Exception("IotDataConnectionSerial - UnsupportedCommOperationException portName=" + portName);
+            dbg.println(3, "IotDataConnectionSerial - UnsupportedCommOperationException portName=" + portName);
         }catch (IOException e)
         {
-            throw new Exception("IotDataConnectionSerial - IOException portName=" + portName);
+            dbg.println(3, "IotDataConnectionSerial - IOException portName=" + portName);
         }
-        t = new Timer(IotComPort.getPollingTime(), this); // polling time in ms
-        t.setRepeats(true);
-        t.start();
+        close();
     }
 
     @Override
@@ -61,6 +67,7 @@ public class IotDataConnectionSerial implements IotDataConnectionIf, ActionListe
             dbg.println(11, "IotDataConnectionSerial.sendIotCommand str=" + bin.toString(cmdData));
         } catch (IOException e) {
             dbg.println(1, "IotDataConnectionSerial.sendIotCommand exception e=" + e.toString());
+            close();
             //e.printStackTrace();
         }
     }
@@ -68,25 +75,41 @@ public class IotDataConnectionSerial implements IotDataConnectionIf, ActionListe
     @Override
     public void close() {
         try {
-            inStream.close();
-            outStream.close();
+            if (inStream != null)
+                inStream.close();
         } catch (IOException e) {
-            dbg.println(1, "IotDataConnectionSerial.close exception e=" + e.toString());
-            e.printStackTrace();
+            dbg.println(1, "IotDataConnectionSerial.close.inStream exception e=" + e.toString());
         }
         inStream = null;
+        try {
+            if (outStream != null)
+                outStream.close();
+        } catch (IOException e) {
+            dbg.println(1, "IotDataConnectionSerial.close.outStream exception e=" + e.toString());
+        }
         outStream = null;
-        serialPort.close();
+        try {
+            if (serialPort != null)
+                serialPort.close();
+        } catch (Exception e) {
+            dbg.println(1, "IotDataConnectionSerial.close.serialPort exception e=" + e.toString());
+        }
         serialPort = null;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (serialPort == null)
+            open();
+        if (serialPort == null)
+            return;
         DataBufferItem buffer = dbh.get(64);
         try {
             int num = inStream.read(buffer.get());
             if (num != 0)
                 dbg.println(19, "IotDataConnectionSerial.actionPerformed num=" + num);
+            if (num < 0)
+                dbg.println(3, "IotDataConnectionSerial.actionPerformed WARNING: num=" + num);
             if (num <= 0) {
                 buffer.release();
                 return;
@@ -96,7 +119,17 @@ public class IotDataConnectionSerial implements IotDataConnectionIf, ActionListe
             buffer.release();
         } catch (IOException e1) {
             dbg.println(1, "IotDataConnectionSerial.actionPerformed exception e=" + e1.toString());
+            close();
         }
+    }
+
+    public void reinit()
+    {
+        t.stop();
+        close();
+        t.setDelay(IotComPort.getPollingTime());
+        t.start();
+        // the port will be reopened in the next timer event
     }
 
     Timer t;

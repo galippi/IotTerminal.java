@@ -1,14 +1,12 @@
 package IotTerminal;
 
 import java.awt.Dimension;
-import java.nio.charset.Charset;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 import config.DbgConfig;
-import iotDataConnection.IotDataConnection;
 import iotDataConnection.IotDataConnectionIf;
 import iotDataConnection.IotDataConnectionSerial;
 import iotDataConnection.IotDataConnectionRxIf;

@@ -12,8 +12,8 @@ public class IotComPort {
     }
 
     public static void reinit() {
-        // TODO Auto-generated method stub
-        
+        if (parent != null)
+            parent.reinit();
     }
 
     public static String getPortName() {
