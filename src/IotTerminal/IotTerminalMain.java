@@ -118,12 +118,12 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
         setLocation(IotTerminalPrefs.get("MainWindowX", 0), IotTerminalPrefs.get("MainWindowY", 0));
         setSize(IotTerminalPrefs.get("MainWindowW", 600), IotTerminalPrefs.get("MainWindowH", 400));
         setExtendedState(IotTerminalPrefs.get("MainWindowState", NORMAL));
-        ldp.addHandler(new IotVoltageHandler("U0", 3.3/4096, 0, mainPanel.getVoltage0Window()));
-        ldp.addHandler(new IotVoltageHandler("U1", 3.3/4096, 0, mainPanel.getVoltage1Window()));
-        ldp.addHandler(new IotVoltageHandler("I", 1, 0, mainPanel.getCurrentWindow()));
-        ldp.addHandler(new IotDht11Handler("DHT", mainPanel.getDht11Window()));
-        ldp.addHandler(new IotDbg00Handler("DBG00", mainPanel.getDbg00Window()));
-        //iotDataConnection = new IotDataConnection(this);
+        for (int i = 0; true; i++) {
+            IotGaugePanel p = mainPanel.getPanel(i);
+            if (p == null)
+                break;
+            ldp.addHandler(p.getLogDataProcessorHandler());
+        }
         try {
             //String path = System.getenv("PATH");
             iotDataConnection = new IotDataConnectionSerial(this);
