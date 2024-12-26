@@ -56,7 +56,7 @@ interface IotGaugeValueChangeCallback
 class IotGaugeVoltage extends IotGaugePanel implements ActionListener {
     public IotGaugeVoltage(String comPrefix, double _factor, double _offset, IotGaugeValueChangeCallback _vcc)
     {
-        setLogDataProcessorHandler(new IotVoltageHandler(comPrefix, 3.3/4096, 0, this));
+        setLogDataProcessorHandler(new IotVoltageHandler(comPrefix, _factor, _offset, this));
         vcc = _vcc;
         t = new Timer(1000, this); // timeout in ms
         t.setRepeats(false);
@@ -68,6 +68,7 @@ class IotGaugeVoltage extends IotGaugePanel implements ActionListener {
     }
 
     public void setValue(double val) {
+        dbg.println(19, "IotGaugeVoltage.setValue val=" + val);
         if (val < 0.001)
             this.val = 0;
         else
