@@ -285,9 +285,10 @@ class IotGaugeString extends IotGaugePanel {
 }
 
 class IotDataPanel extends JPanel {
-    IotDataPanel() {
+    IotDataPanel(IotTerminalMainPanel _parent) {
+        parent = _parent;
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-        addPanel(ibp = new IotBatteryPanel());
+        addPanel(ibp = new IotBatteryPanel(this));
         addPanel(new IotGaugeVoltage("U0", 3.3/4096, 0, ibp));
         addPanel(new IotGaugeVoltage("U1", 3.3/4096, 0, null));
         addPanel(new IotGaugeCurrent("I", 1, 0, ibp));
@@ -329,6 +330,7 @@ class IotDataPanel extends JPanel {
         g.drawString("BaCD", 30, 170);
     }
 
+    IotTerminalMainPanel parent;
     Vector<IotGaugePanel> panels = new Vector<>();
 
     private static final long serialVersionUID = 960859627532168948L;
@@ -400,7 +402,7 @@ public class IotTerminalMainPanel extends JPanel {
 
         parent = _parent;
 
-        upper = new IotDataPanel();
+        upper = new IotDataPanel(this);
         JPanel bottom = new IotTerminalCommandEditor(this);
         logger = new JTextArea();
         logger.setEditable(false);
