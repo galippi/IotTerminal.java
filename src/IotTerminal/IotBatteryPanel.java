@@ -44,7 +44,8 @@ class IotBatteryDataPanel extends JPanel
         g.setColor(Color.BLACK);
         g.setFont(fontDefault);
         String val = "ctr=" + paintCtr + " " + IotBatteryStateMachine.toString(parent.state) + " " + parent.u0 + "V " +
-                parent.ut + "V " + parent.i + "mA " + (parent.r * 1000) + " mOhm";
+                parent.ut + "V " + parent.it + "mA " + (parent.r * 1000) + " mOhm";
+        dbg.println(19, "IotBatteryDataPanel.paintComponent val=" + val);
         g.drawString(val, 10, 15);
         paintCtr++;
     }
@@ -203,6 +204,7 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
     }
 
     private void sendDutyRequest(int _duty) {
+        dbg.println(19, "IotBatteryPanel.sendDutyRequest _duty=" + _duty);
         parent.parent.sendIotCommand("SR" + Integer.toHexString(_duty) + '\r');
 //        parent.sendIotCommand("SR" + Integer.toHexString(_duty) + '\r');
     }
