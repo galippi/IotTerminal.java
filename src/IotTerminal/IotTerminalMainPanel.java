@@ -33,8 +33,7 @@ class IotGaugeVoltage extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        val = Double.NaN;
-        this.repaint();
+        setValue(Double.NaN);
     }
 
     public void setValue(double val) {
@@ -43,7 +42,10 @@ class IotGaugeVoltage extends JPanel implements ActionListener {
         else
             this.val = val;
         this.repaint();
-        t.restart();
+        if (Double.isNaN(this.val))
+            t.stop();
+        else
+            t.restart();
     }
 
     @Override
