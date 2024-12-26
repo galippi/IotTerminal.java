@@ -27,7 +27,7 @@ class IotGaugeVoltage extends JPanel implements ActionListener {
 
     public IotGaugeVoltage()
     {
-        t = new Timer(1000, this); // polling time in ms
+        t = new Timer(1000, this); // timeout in ms
         t.setRepeats(false);
     }
 
@@ -38,7 +38,10 @@ class IotGaugeVoltage extends JPanel implements ActionListener {
     }
 
     public void setValue(double val) {
-        this.val = val;
+        if ((val > 7) || (val < 0))
+            this.val = 0;
+        else
+            this.val = val;
         this.repaint();
         t.restart();
     }
@@ -87,6 +90,12 @@ class IotGaugeVoltage extends JPanel implements ActionListener {
 }
 
 class IotGaugeCurrent extends IotGaugeVoltage {
+    @Override
+    public void setValue(double val) {
+        this.val = val;
+        this.repaint();
+        t.restart();
+    }
     @Override
     public void paintComponent(java.awt.Graphics g) {
         //super.paintComponent(g);
