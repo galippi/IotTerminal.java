@@ -43,8 +43,9 @@ class IotBatteryDataPanel extends JPanel
 
         g.setColor(Color.BLACK);
         g.setFont(fontDefault);
-        String val = "ctr=" + paintCtr + " " + IotBatteryStateMachine.toString(parent.state) + " " + parent.u0 + "V " +
-                parent.ut + "V " + parent.it + "mA " + (parent.r * 1000) + " mOhm";
+        String val = "ctr=" + paintCtr + " " + IotBatteryStateMachine.toString(parent.state) + " " + String.format("%.3f", parent.u0) + "V " +
+                String.format("%.3f", parent.ut) + "V " + String.format("%.1f", parent.it) + "mA " +
+                String.format("%.1f", (parent.r * 1000)) + " mOhm " + (parent.duty * 1000) / 255 + "%%";
         dbg.println(19, "IotBatteryDataPanel.paintComponent val=" + val);
         g.drawString(val, 10, 15);
         paintCtr++;
@@ -95,7 +96,7 @@ enum IotBatteryStateMachine
 
 class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, ActionListener
 {
-    private int duty;
+    int duty;
     private IotDataPanel parent;
 
     IotBatteryPanel(IotDataPanel _parent)
