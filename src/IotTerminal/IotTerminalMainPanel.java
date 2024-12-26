@@ -272,16 +272,42 @@ class IotGaugeString extends IotGaugePanel {
     private static final long serialVersionUID = 364126486431139014L;
 }
 
+class IotBatteryPanel extends JPanel
+{
+    IotBatteryPanel()
+    {
+        super(new BorderLayout());
+
+        Dimension d = new Dimension(2000, 100);
+
+        data = new JPanel();
+
+        logger = new JTextArea();
+
+        JSplitPane horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, data, new JScrollPane(logger));
+
+        add(horizontalSplit);
+        this.setMaximumSize(d);
+    }
+
+    JPanel data;
+    JTextArea logger;
+
+    private static final long serialVersionUID = -1492376671650452880L;
+}
+
 class IotDataPanel extends JPanel {
     IotDataPanel() {
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+        addPanel(ibp = new IotBatteryPanel());
         addPanel(new IotGaugeVoltage("U0", 3.3/4096, 0));
         addPanel(new IotGaugeVoltage("U1", 3.3/4096, 0));
         addPanel(new IotGaugeCurrent("I", 1, 0));
         addPanel(new IotGaugeDht11("DHT"));
         addPanel(new IotGaugeString("DBG00"));
-        addPanel(new JPanel());
     }
+
+    IotBatteryPanel ibp;
 
     void addPanel(Object child)
     {
