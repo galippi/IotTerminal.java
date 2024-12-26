@@ -48,10 +48,16 @@ abstract class IotGaugePanel extends JPanel implements IotGaugePanelIf
     private static final long serialVersionUID = 5041857164464118261L;
 }
 
+interface IotGaugeValueChangeCallback
+{
+    void setValue(String type, double val);
+}
+
 class IotGaugeVoltage extends IotGaugePanel implements ActionListener {
-    public IotGaugeVoltage(String comPrefix, double _factor, double _offset)
+    public IotGaugeVoltage(String comPrefix, double _factor, double _offset, IotGaugeValueChangeCallback _vcc)
     {
         setLogDataProcessorHandler(new IotVoltageHandler(comPrefix, 3.3/4096, 0, this));
+        vcc = _vcc;
         t = new Timer(1000, this); // timeout in ms
         t.setRepeats(false);
     }
@@ -62,7 +68,7 @@ class IotGaugeVoltage extends IotGaugePanel implements ActionListener {
     }
 
     public void setValue(double val) {
-        if ((val > 7) || (val < 0))
+        if (val < 0.001)
             this.val = 0;
         else
             this.val = val;
@@ -71,6 +77,10 @@ class IotGaugeVoltage extends IotGaugePanel implements ActionListener {
             t.stop();
         else
             t.restart();
+        if (vcc != null) {
+            LogDataProcessorHandlerBase ldh = getLogDataProcessorHandler();
+            vcc.setValue(ldh.getPrefix(), this.val);
+        }
     }
 
     @Override
@@ -112,21 +122,23 @@ class IotGaugeVoltage extends IotGaugePanel implements ActionListener {
     protected double val = Double.NaN;
     int paintCtr = 0;
     Timer t;
+    IotGaugeValueChangeCallback vcc;
 
     private static final long serialVersionUID = 364126482051139014L;
 }
 
 class IotGaugeCurrent extends IotGaugeVoltage {
-    public IotGaugeCurrent(String comPrefix, double factor, double offset) {
-        super(comPrefix, factor, offset);
+    public IotGaugeCurrent(String comPrefix, double factor, double offset, IotGaugeValueChangeCallback ibp) {
+        super(comPrefix, factor, offset, ibp);
     }
 
-    @Override
-    public void setValue(double val) {
+    //@Override
+    public void setValue_(double val) {
         this.val = val;
         this.repaint();
         t.restart();
     }
+
     @Override
     public void paintComponent(java.awt.Graphics g) {
         //super.paintComponent(g);
@@ -276,9 +288,9 @@ class IotDataPanel extends JPanel {
     IotDataPanel() {
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         addPanel(ibp = new IotBatteryPanel());
-        addPanel(new IotGaugeVoltage("U0", 3.3/4096, 0));
-        addPanel(new IotGaugeVoltage("U1", 3.3/4096, 0));
-        addPanel(new IotGaugeCurrent("I", 1, 0));
+        addPanel(new IotGaugeVoltage("U0", 3.3/4096, 0, ibp));
+        addPanel(new IotGaugeVoltage("U1", 3.3/4096, 0, null));
+        addPanel(new IotGaugeCurrent("I", 1, 0, ibp));
         addPanel(new IotGaugeDht11("DHT"));
         addPanel(new IotGaugeString("DBG00"));
     }
