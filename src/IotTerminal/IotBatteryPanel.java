@@ -98,6 +98,7 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
 {
     int duty;
     private IotDataPanel parent;
+    private long td;
 
     IotBatteryPanel(IotDataPanel _parent)
     {
@@ -159,11 +160,12 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
                     }
                     break;
                 case IBSM_meas_u0:
-                    if ((u > 1.1) && (i < 10) && (dt > 1_000_000_000))
+                    if ((u > 1.1) && (i < 10) && (dt > t_1_sec_in_ns))
                     {
                         state = IotBatteryStateMachine.IBSM_meas_u1;
                         u0 = u;
                         duty = 0x50;
+                        td = t;
                         sendDutyRequest(duty);
                         stateTimer = t;
                     }
@@ -177,13 +179,16 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
                         if (u < 0.9) {
                             state = IotBatteryStateMachine.IBSM_meas_error;
                         }else if (i < 120) {
-                            duty = duty + 4;
-                            if (duty > 240) {
-                                state = IotBatteryStateMachine.IBSM_meas_duty_error;
-                                duty = 240;
+                            if ((t - td) > t_50_msec_in_ns) {
+                                td = td + t_50_msec_in_ns;
+                                duty = duty + 4;
+                                if (duty > 240) {
+                                    state = IotBatteryStateMachine.IBSM_meas_duty_error;
+                                    duty = 240;
+                                }
+                                else
+                                    sendDutyRequest(duty);
                             }
-                            else
-                                sendDutyRequest(duty);
                         }else {
                             ut = u;
                             it = i;
@@ -226,6 +231,7 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
         stateMachineUpdate();
     }
 
+    private final long t_50_msec_in_ns =  50_000_000;
     private final long t_1_sec_in_ns = 1_000_000_000;
     private final long t_2_sec_in_ns = 2 * t_1_sec_in_ns;
     private final long t_5_sec_in_ns = 5 * t_1_sec_in_ns;
