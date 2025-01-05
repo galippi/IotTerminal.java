@@ -6,16 +6,15 @@
 package IotTerminal;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Vector;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -37,17 +36,162 @@ import lippiWare.utils.dbg;
  *
  * @author liptakok
  */
+
+abstract class RowHandler
+{
+    abstract String getName();
+    abstract Object getValue();
+    abstract void setValue(Object newValue) throws Exception;
+    abstract void update();
+
+    int getId()
+    {
+        return id;
+    }
+    int id;
+}
+
+class RowHandlerDebugLevel extends RowHandler
+{
+    @Override
+    String getName() {
+        return "Debug level";
+    }
+
+    @Override
+    Object getValue() {
+        return "" + dbg.get();
+    }
+
+    @Override
+    void setValue(Object newValue) throws Exception {
+        newLevel = Integer.parseInt((String) newValue);
+        if (newLevel < 0)
+            throw new Exception("RowHandlerDebugLevel.setValue - the new level (" + newLevel + ") shall be > 0!");
+    }
+
+    @Override
+    void update() {
+        if (newLevel < 0)
+            throw new Error("RowHandlerDebugLevel.update (newLevel=" + newLevel + ")!");
+        IotTerminalPrefs.put("Debug level", newLevel);
+        dbg.set(newLevel);
+    }
+
+    int newLevel = -1;
+}
+
+class RowHandlerPortName extends RowHandler
+{
+    @Override
+    String getName() {
+        return "Port name";
+    }
+
+    @Override
+    Object getValue() {
+        return IotComPort.getPortName();
+    }
+
+    @Override
+    void setValue(Object newValue) throws Exception {
+        comPortName = (String)newValue;
+        if ((comPortName.length() < 1) || (!IotComPort.isComPortValid(comPortName)))
+            throw new Exception("Invalid COM port name (" + comPortName + ")");
+    }
+
+    @Override
+    void update() {
+        IotComPort.openPort(comPortName);
+    }
+
+    String comPortName;
+}
+
+class RowHandlerBaudRate extends RowHandler
+{
+    @Override
+    String getName() {
+        return "Baud rate";
+    }
+
+    @Override
+    Object getValue() {
+        return ""+IotComPort.getBaudRate();
+    }
+
+    @Override
+    void setValue(Object newValue) throws Exception {
+        baudRate = Integer.parseInt((String)newValue);
+        if ((baudRate < 100) || (baudRate > 10000000))
+            throw new Exception("Invalid baud rate");
+    }
+
+    @Override
+    void update() {
+        IotComPort.setBaudRate(baudRate);
+    }
+
+    int baudRate;
+}
+
+class RowHandlerPollingTime extends RowHandler
+{
+    @Override
+    String getName() {
+        return "Polling time of COM port [ms]";
+    }
+
+    @Override
+    Object getValue() {
+        return ""+IotComPort.getPollingTime();
+    }
+
+    @Override
+    void setValue(Object newValue) throws Exception {
+        pollingTime = Integer.parseInt((String)newValue);
+        if ((pollingTime < 10) || (pollingTime > 5000))
+            throw new Exception("Invalid polling time");
+    }
+
+    @Override
+    void update() {
+        IotComPort.setPollingTime(pollingTime);
+    }
+
+    int pollingTime;
+}
+
+class OptionDialogRowListHandler
+{
+    RowHandler addRow(RowHandler row)
+    {
+        row.id = rows.size();
+        rows.add(row);
+        return row;
+    }
+
+    int getRowCount()
+    {
+        return rows.size();
+    }
+
+    RowHandler get(int idx)
+    {
+        return rows.get(idx);
+    }
+
+    Vector<RowHandler> rows = new Vector<>();
+}
+
 public class OptionsDialog extends JDialog {
 
   //headers for the table
   final String[] columnNames = new String[] {
       "Property name", "Property value"
   };
-  final int colPropertyValue = 1;
-  final int rowDebugLevel = 0;
-  final int rowComPortName = 1;
-  final int rowComPortBaudRate = 2;
-  final int rowComPortPollingTime = 3;
+  final int colValue = 1;
+  OptionDialogRowListHandler odrlh = new OptionDialogRowListHandler();
 
   IotTerminalMain parent;
 
@@ -56,6 +200,11 @@ public class OptionsDialog extends JDialog {
     super(_parent, Dialog.ModalityType.APPLICATION_MODAL);
     parent = _parent;
     this.setTitle("Options");
+
+    odrlh.addRow(new RowHandlerDebugLevel());
+    odrlh.addRow(new RowHandlerPortName());
+    odrlh.addRow(new RowHandlerBaudRate());
+    odrlh.addRow(new RowHandlerPollingTime());
 
     //create table with data
     table = new JTable(new DefaultTableModel(4, columnNames.length) {
@@ -76,14 +225,13 @@ public class OptionsDialog extends JDialog {
         column.setResizable(true);
         column.setHeaderValue(columnNames[i]);
     }
-    table.setValueAt("Debug level:", rowDebugLevel, 0);
-    table.setValueAt("" + dbg.get(), rowDebugLevel, colPropertyValue);
-    table.setValueAt("COM port:",              rowComPortName, 0);
-    table.setValueAt(IotComPort.getPortName(), rowComPortName, colPropertyValue);
-    table.setValueAt("Baud rate:",                rowComPortBaudRate, 0);
-    table.setValueAt(""+IotComPort.getBaudRate(), rowComPortBaudRate, colPropertyValue);
-    table.setValueAt("Polling time of COM port [ms]:", rowComPortPollingTime, 0);
-    table.setValueAt(""+IotComPort.getPollingTime(),   rowComPortPollingTime, colPropertyValue);
+
+    for (int i = 0; i < odrlh.getRowCount(); i++)
+    {
+        RowHandler row = odrlh.get(i);
+        table.setValueAt(row.getName() + ":", i, 0);
+        table.setValueAt(row.getValue(), i, colValue);
+    }
 
     table.addMouseListener(new MouseListener() {
         @Override
@@ -176,52 +324,32 @@ public class OptionsDialog extends JDialog {
 
   void okHandler()
   {
-    boolean closable = true;
-    int level = -1;
-    String comPortName = "";
-    int baudRate = 0;
-    int pollingTime = -1;
     try {
-      level = Integer.parseInt((String) table.getValueAt(rowDebugLevel, colPropertyValue));
-      if (level < 0)
-          throw new Exception("Invalid debug level");
-      comPortName = (String) table.getValueAt(rowComPortName, colPropertyValue);
-      if ((comPortName.length() < 1) || (!IotComPort.isComPortValid(comPortName)))
-          throw new Exception("Invalid COM port name");
-      baudRate = Integer.parseInt((String) table.getValueAt(rowComPortBaudRate, colPropertyValue));
-      if ((baudRate < 100) || (baudRate > 10000000))
-          throw new Exception("Invalid baud rate");
-      pollingTime = Integer.parseInt((String) table.getValueAt(rowComPortPollingTime, colPropertyValue));
-      if ((pollingTime < 10) || (pollingTime > 5000))
-          throw new Exception("Invalid polling time");
-    }catch (Exception e)
-    {
-      dbg.println(2, "OptionDialog.okHandler.Exception="+e.toString());
-      JOptionPane.showMessageDialog(parent, e.getMessage(),
-                                    "Options", JOptionPane.WARNING_MESSAGE);
-      closable = false;
-    }
+        for (int i = 0; i < odrlh.getRowCount(); i++)
+        {
+            RowHandler row = odrlh.get(i);
+            row.setValue(table.getValueAt(i, colValue));
+        }
 
-    if (closable)
-    {
-        IotTerminalPrefs.put("Debug level", level);
-        dbg.set(level);
-
-        IotComPort.openPort(comPortName);
-        //parent.setBackgroundColor(backgroundColor);
-
-        IotComPort.setBaudRate(baudRate);
-
-        IotComPort.setPollingTime(pollingTime);
+        for (int i = 0; i < odrlh.getRowCount(); i++)
+        {
+            RowHandler row = odrlh.get(i);
+            row.update();
+        }
 
         IotComPort.reinit();
+
+        setVisible(false);
 
         IotTerminalPrefs.put("OptionsDialogX", getX());
         IotTerminalPrefs.put("OptionsDialogY", getY());
         IotTerminalPrefs.put("OptionsDialogH", getHeight());
         IotTerminalPrefs.put("OptionsDialogW", getWidth());
-
-        setVisible(false);
+    }catch (Exception e)
+    {
+      dbg.println(2, "OptionDialog.okHandler.Exception="+e.toString());
+      JOptionPane.showMessageDialog(parent, e.getMessage(),
+                                    "Options", JOptionPane.WARNING_MESSAGE);
     }
   }
 
