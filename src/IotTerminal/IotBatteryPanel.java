@@ -98,6 +98,7 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
 {
     int duty;
     private IotDataPanel parent;
+    /** Duty update timer is ns */
     private long td;
 
     IotBatteryPanel(IotDataPanel _parent)
