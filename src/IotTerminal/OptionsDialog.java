@@ -6,6 +6,7 @@
 package IotTerminal;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Dimension;
@@ -17,7 +18,9 @@ import java.awt.event.MouseListener;
 import java.util.Vector;
 
 import javax.swing.BoxLayout;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -27,6 +30,8 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import iotDataConnection.IotComPort;
@@ -81,7 +86,7 @@ class RowHandlerDebugLevel extends RowHandler
     int newLevel = -1;
 }
 
-class RowHandlerPortName extends RowHandler
+class RowHandlerPortName extends RowHandler implements TableCellRenderer
 {
     @Override
     String getName() {
@@ -90,7 +95,10 @@ class RowHandlerPortName extends RowHandler
 
     @Override
     Object getValue() {
-        return IotComPort.getPortName();
+        String[] ports = IotComPort.getAvailablePorts();
+        box = new JComboBox<>(ports);
+        box.setSelectedItem(IotComPort.getPortName());
+        return box;
     }
 
     @Override
@@ -105,7 +113,14 @@ class RowHandlerPortName extends RowHandler
         IotComPort.openPort(comPortName);
     }
 
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+            int row, int column) {
+        return box;
+    }
+
     String comPortName;
+    JComboBox<String> box;
 }
 
 class RowHandlerBaudRate extends RowHandler
@@ -202,7 +217,8 @@ public class OptionsDialog extends JDialog {
     this.setTitle("Options");
 
     odrlh.addRow(new RowHandlerDebugLevel());
-    odrlh.addRow(new RowHandlerPortName());
+    final RowHandlerPortName rhpn = new RowHandlerPortName();
+    odrlh.addRow(rhpn);
     odrlh.addRow(new RowHandlerBaudRate());
     odrlh.addRow(new RowHandlerPollingTime());
 
@@ -213,8 +229,21 @@ public class OptionsDialog extends JDialog {
         {
             return (column == 1);
         }
+        private static final long serialVersionUID = 1L;
+    }) {
+        public TableCellRenderer getCellRenderer(int row, int column) {
+            if ((row == rhpn.getId()) && (column == 1)) {
+                return rhpn;
+            }
+            // else...
+            return super.getCellRenderer(row, column);
+        }
+        public TableCellEditor getCellEditor(int row, int column) {
+            return new DefaultCellEditor(rhpn.box);
+        }
         private static final long serialVersionUID = 2641690847759012960L;
-    });
+    };
+
     javax.swing.table.TableColumnModel columnModel = table.getColumnModel();
     for (int i = 0; i < columnNames.length; i++)
     {
