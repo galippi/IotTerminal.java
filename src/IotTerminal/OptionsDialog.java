@@ -58,7 +58,7 @@ public class OptionsDialog extends JDialog {
     this.setTitle("Options");
 
     //create table with data
-    table = new JTable(new DefaultTableModel(4, 2) {
+    table = new JTable(new DefaultTableModel(4, columnNames.length) {
         @Override
         public boolean isCellEditable(int row, int column)
         {
