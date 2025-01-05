@@ -1,6 +1,11 @@
 package iotDataConnection;
 
+import java.util.Enumeration;
+import java.util.Vector;
+
 import IotTerminal.IotTerminalPrefs;
+import gnu.io.CommPortIdentifier;
+import lippiWare.utils.dbg;
 
 public class IotComPort {
 
@@ -45,6 +50,18 @@ public class IotComPort {
     public static void setPollingTime(int pollingTime) {
         IotComPort.pollingTime = pollingTime;
         IotTerminalPrefs.put(pollingTimePref, pollingTime);
+    }
+
+    public static String[] getAvailablePorts() {
+        @SuppressWarnings("unchecked")
+        Enumeration<CommPortIdentifier> comPortsEnumeration = CommPortIdentifier.getPortIdentifiers();
+        Vector<String> comPorts = new Vector<>();
+        while(comPortsEnumeration.hasMoreElements()) {
+            CommPortIdentifier cpi = comPortsEnumeration.nextElement();
+            dbg.println(9, "IotComPort.getAvailablePorts.CommPortIdentifier.getPortIdentifiers cpi=" + cpi.toString() + " " + cpi.getName() + " " + cpi.getPortType());
+            comPorts.add(cpi.getName());
+        }
+        return (String[]) comPorts.toArray(new String[comPorts.size()]);
     }
 
     static IotDataConnectionSerial parent;
