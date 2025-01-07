@@ -112,6 +112,17 @@ public class IotDataLogger {
         }
     }
 
+    public static void setData(int msgId, byte[] data) {
+        if (myWriter == null)
+            return;
+        CanMessage msg = new CanMessage(0, timeStampNow(), msgId, CanMessage.Tx, data.length, data);
+        try {
+            myWriter.write(VectorAscFile.toString(msg) + "\n");
+        } catch (IOException e) {
+            dbg.println(1, "Unable to write (setData) to file \'" + filename + "\'! e=" + e.toString());
+        }
+    }
+
     private static long timeStampNow() {
         long dt = System.nanoTime() - t0;
         return dt;

@@ -24,6 +24,7 @@ import config.DbgConfig;
 import lippiWare.utils.bin;
 import lippiWare.utils.dbg;
 import lwLogDataProcessor.LogDataProcessorHandlerBase;
+import lwLogDataProcessor.LogDataProcessorHexu8ArrayBase;
 
 interface IotGaugePanelIf
 {
@@ -277,6 +278,8 @@ class IotGaugeString extends IotGaugePanel {
     public void setValue(String val) {
         this.val = val;
         this.repaint();
+        byte[] data = LogDataProcessorHexu8ArrayBase.toByteArray("DBG00", val);
+        IotDataLogger.setData(0x20, data);
     }
 
     @Override
