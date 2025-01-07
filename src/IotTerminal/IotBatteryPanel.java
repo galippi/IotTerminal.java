@@ -106,6 +106,8 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
         super(new BorderLayout());
         parent = _parent;
 
+        IotDataLogger.open("_demo.asc");
+
         Dimension d = new Dimension(2000, 200);
 
         data = new IotBatteryDataPanel(this);
@@ -127,6 +129,7 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
     {
         u = newVal;
         tu = System.nanoTime();
+        IotDataLogger.setU0(u);
         stateMachineUpdate();
     }
 
@@ -134,6 +137,7 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
     {
         i = newVal;
         ti = System.nanoTime();
+        IotDataLogger.setI(i);
         stateMachineUpdate();
     }
 
@@ -221,8 +225,11 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
         if (type.contentEquals("U0"))
             setU(val);
         else
-        if (type.contentEquals("I"))
+        if (type.contentEquals("I")) {
             setI(val);
+        }else
+        if (type.contentEquals("U1"))
+            IotDataLogger.setU1(val);
         else
             ; // do nothing
     }

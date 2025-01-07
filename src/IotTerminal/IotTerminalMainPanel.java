@@ -185,17 +185,44 @@ class IotGaugeCurrent extends IotGaugeVoltage {
     private static final long serialVersionUID = 9068897958698386929L;
 }
 
+interface IotGaugeDhtChangeCallback
+{
+    void setValue(String type, double T, double hum, int dataCtr, int errCtr);
+}
+
+class DhtCallBack implements IotGaugeDhtChangeCallback {
+    @Override
+    public void setValue(String type, double T, double hum, int dataCtr, int errCtr) {
+        IotDataLogger.setDHT(T, hum, dataCtr, errCtr);
+    }
+}
+
 class IotGaugeDht11 extends IotGaugePanel {
-    public IotGaugeDht11(String _comPrefix) {
+    public IotGaugeDht11(String _comPrefix, IotGaugeDhtChangeCallback _dhtCallBack) {
         setLogDataProcessorHandler(new IotDht11Handler("DHT", this));
+        dhtCallBack = _dhtCallBack;
     }
 
     public void setValue(byte[] data) {
         this.data = data;
+        if (data != null) {
+            t         = toInt(data[0]) * 256 + toInt(data[1]);
+            hummidity = toInt(data[2]) * 256 + toInt(data[3]);
+            dataCtr   = toInt(data[4]);
+            errCtr    = toInt(data[5]);
+        }else {
+            t = -32768;
+            hummidity = 65535;
+        }
         this.repaint();
+        dhtCallBack.setValue("DHT", t * 0.1, hummidity * 0.1, dataCtr, errCtr);
     }
 
     byte[] data;
+    int t;
+    int hummidity;
+    int dataCtr;
+    int errCtr;
 
     @Override
     public void paintComponent(java.awt.Graphics g) {
@@ -220,10 +247,6 @@ class IotGaugeDht11 extends IotGaugePanel {
         if (data.length != 6) {
             valStr = "NaN (" + data.length + ")";
         }else{
-            int t         = toInt(data[0]) * 256 + toInt(data[1]);
-            int hummidity = toInt(data[2]) * 256 + toInt(data[3]);
-            int dataCtr   = toInt(data[4]);
-            int errCtr    = toInt(data[5]);
             valStr = "" + (t / 10) + "." + (t % 10) + "C " + 
                           (hummidity / 10) + "." + (hummidity % 10) + "% " + dataCtr + " " + errCtr;
         }
@@ -238,7 +261,8 @@ class IotGaugeDht11 extends IotGaugePanel {
     int toInt(byte b) {
         return (int)(b & 0xFF);
     }
-    protected double val = Double.NaN;
+
+    IotGaugeDhtChangeCallback dhtCallBack;
     int paintCtr = 0;
 
     private static final long serialVersionUID = 364126482051139014L;
@@ -291,9 +315,9 @@ class IotDataPanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         addPanel(ibp = new IotBatteryPanel(this));
         addPanel(new IotGaugeVoltage("U0", 3.3/4096, 0, ibp));
-        addPanel(new IotGaugeVoltage("U1", 3.3/4096, 0, null));
+        addPanel(new IotGaugeVoltage("U1", 3.3/4096, 0, ibp));
         addPanel(new IotGaugeCurrent("I", 1, 0, ibp));
-        addPanel(new IotGaugeDht11("DHT"));
+        addPanel(new IotGaugeDht11("DHT", new DhtCallBack()));
         addPanel(new IotGaugeString("DBG00"));
     }
 

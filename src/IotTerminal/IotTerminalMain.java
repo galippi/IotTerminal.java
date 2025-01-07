@@ -227,12 +227,17 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
       dbg.println(9, "windowClose");
       iotDataConnection.close();
       this.setVisible(false);
+
+      IotDataLogger.close();
+
       IotTerminalPrefs.put("MainWindowX", getX());
       IotTerminalPrefs.put("MainWindowY", getY());
       IotTerminalPrefs.put("MainWindowH", getHeight());
       IotTerminalPrefs.put("MainWindowW", getWidth());
       IotTerminalPrefs.put("MainWindowState", getExtendedState());
+
       mainPanel.saveWindowLayout();
+
       System.exit(0);
     }
 

@@ -1,6 +1,9 @@
 [submodule "src/lippiWare/utils"]
 	path = src/lippiWare/utils
 	url = s:\\git\\utils.java
+[submodule "src/lippiWare/blfHandler"]
+	path = src/lippiWare/blfHandler
+	url = s:\\git\\BlfHandler.java.git
 [submodule "src/lwLogDataProcessor"]
 	path = src/lwLogDataProcessor
 	url = s:\\git\\lwLogDataProcessor
