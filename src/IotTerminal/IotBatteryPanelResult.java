@@ -1,10 +1,15 @@
 package IotTerminal;
 
+import java.awt.Font;
+
 import javax.swing.JLabel;
 
 public class IotBatteryPanelResult extends JLabel {
     IotBatteryPanelResult() {
         super();
+        final int fontSize = 32;
+        setFont(new Font("Arial", Font.PLAIN, fontSize));
+        setHorizontalAlignment(JLabel.LEFT);
         setText("No");
     }
 
