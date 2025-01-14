@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.util.Vector;
 
 import javax.swing.BoxLayout;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -206,7 +207,7 @@ class IotGaugeDht11 extends IotGaugePanel {
 
     public void setValue(byte[] data) {
         this.data = data;
-        if (data != null) {
+        if ((data != null) && (data.length == 6)) {
             t         = toInt(data[0]) * 256 + toInt(data[1]);
             hummidity = toInt(data[2]) * 256 + toInt(data[3]);
             dataCtr   = toInt(data[4]);
@@ -316,6 +317,7 @@ class IotDataPanel extends JPanel {
     IotDataPanel(IotTerminalMainPanel _parent) {
         parent = _parent;
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+        addPanel(ibpr = new IotBatteryPanelResult());
         addPanel(ibp = new IotBatteryPanel(this));
         addPanel(new IotGaugeVoltage("U0", 3.3/4096, 0, ibp));
         addPanel(new IotGaugeVoltage("U1", 3.3/4096, 0, ibp));
@@ -335,7 +337,7 @@ class IotDataPanel extends JPanel {
         {
             dbg.println(19, "IotDataPanel.addPanel exception e=" + e.toString());
         }
-        add((JPanel)child);
+        add((JComponent)child);
     }
 
     public IotGaugePanel getPanel(int idx) {
@@ -358,8 +360,18 @@ class IotDataPanel extends JPanel {
         g.drawString("BaCD", 30, 170);
     }
 
+    public void setMeasData(double _u0, double _r) {
+        u0 = _u0;
+        r = _r;
+        ibpr.setMeasData(u0, r);
+    }
+
+    double r = Double.NaN;
+    double u0 = Double.NaN;
+
     IotTerminalMainPanel parent;
     Vector<IotGaugePanel> panels = new Vector<>();
+    private IotBatteryPanelResult ibpr;
 
     private static final long serialVersionUID = 960859627532168948L;
 }
