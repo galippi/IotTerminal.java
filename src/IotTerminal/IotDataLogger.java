@@ -75,7 +75,7 @@ public class IotDataLogger {
             return;
         data4[0] = (byte)(i & 0xFF);
         data4[1] = (byte)((i >> 8) & 0xFF);
-        int mAhi = (int)(mAh * 10);
+        int mAhi = (int)(mAh * 10); // resolution: 100 uAh
         data4[2] = (byte)(mAhi & 0xFF);
         data4[3] = (byte)((mAhi >> 8) & 0xFF);
         CanMessage msg = new CanMessage(0, timeStampNow(), 0x12, CanMessage.Tx, data4);
