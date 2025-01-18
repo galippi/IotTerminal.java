@@ -66,16 +66,19 @@ public class IotDataLogger {
         }
     }
 
-    static void setI(double val) {
+    static void setI(double val, double mAh) {
         if (Double.isNaN(val))
             i = 0x7FFF;
         else
             i = (int)(val * 1);
         if (myWriter == null)
             return;
-        data2[0] = (byte)(i & 0xFF);
-        data2[1] = (byte)((i >> 8) & 0xFF);
-        CanMessage msg = new CanMessage(0, timeStampNow(), 0x12, CanMessage.Tx, 2, data2);
+        data4[0] = (byte)(i & 0xFF);
+        data4[1] = (byte)((i >> 8) & 0xFF);
+        int mAhi = (int)(mAh * 10);
+        data4[2] = (byte)(mAhi & 0xFF);
+        data4[3] = (byte)((mAhi >> 8) & 0xFF);
+        CanMessage msg = new CanMessage(0, timeStampNow(), 0x12, CanMessage.Tx, data4);
         try {
             myWriter.write(VectorAscFile.toString(msg) + "\n");
         } catch (IOException e) {
@@ -135,5 +138,6 @@ public class IotDataLogger {
     static int u1 = 0xFFFF;
     static int i = 0xFFFF;
     static byte[] data2 = new byte[2];
+    static byte[] data4 = new byte[4];
     static byte[] data8 = new byte[8];
 }

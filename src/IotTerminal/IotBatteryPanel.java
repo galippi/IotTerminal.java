@@ -135,11 +135,21 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
 
     void setI(double newVal)
     {
+        long tiNew = System.nanoTime(); // in ns
+        if (u > 0.5) {
+            e = e + (((ti - tiNew) * i) / (3600 * 1e9));
+        }else {
+            if (e_last == 0) {
+                e_last = e;
+                e = 0;
+            }
+        }
         i = newVal;
-        ti = System.nanoTime();
-        IotDataLogger.setI(i);
+        ti = tiNew;
+        IotDataLogger.setI(i, e);
         stateMachineUpdate();
     }
+    double e_last = 0, e = 0; // in mAh
 
     void stateMachineUpdate()
     {
@@ -183,7 +193,7 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
                     {
                         if (u < 0.9) {
                             state = IotBatteryStateMachine.IBSM_meas_error;
-                        }else if (i < 120) {
+                        }else if (i < 70) {
                             if ((t - td) > t_50_msec_in_ns) {
                                 td = td + t_50_msec_in_ns;
                                 duty = duty + 4;
