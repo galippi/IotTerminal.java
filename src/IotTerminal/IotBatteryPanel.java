@@ -64,6 +64,7 @@ enum IotBatteryStateMachine
     IBSM_set_It,
     IBSM_meas_u1,
     IBSM_meas_ready,
+    IBSM_meas_stopped,
     IBSM_meas_timeout,
     IBSM_meas_duty_error,
     IBSM_meas_error;
@@ -106,6 +107,9 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
         super(new BorderLayout());
         parent = _parent;
 
+        iResistance = IotTerminalPrefs.get("iResistance", 60);
+        iCapacityMin = IotTerminalPrefs.get("iCapacityMin", 100);
+
         IotDataLogger.open("_demo.asc");
 
         Dimension d = new Dimension(2000, 200);
@@ -140,10 +144,7 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
             e = e + (((ti - tiNew) * i) / (3600 * 1e9));
             e_last = e;
         }else {
-            if (e_last == 0) {
-                e_last = e;
-                e = 0;
-            }
+            e = 0;
         }
         i = newVal;
         ti = tiNew;
@@ -195,7 +196,7 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
                     {
                         if (u < 0.9) {
                             state = IotBatteryStateMachine.IBSM_meas_error;
-                        }else if (i < 70) {
+                        }else if (i < iResistance) {
                             ut = u;
                             it = i;
                             if ((t - td) > t_50_msec_in_ns) {
@@ -220,6 +221,26 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
                     }
                     break;
                 case IBSM_meas_ready:
+                    if ((u < 0.7) && (i < 40)) {
+                        state = IotBatteryStateMachine.IBSM_meas_stopped;
+                        parent.setMeasData(u0, r, e_last);
+                    }else {
+                        if ((t - td) > t_50_msec_in_ns) {
+                            td = td + t_50_msec_in_ns;
+                            if (u < 1)
+                                duty = duty - 4;
+                            else
+                            if (i < iCapacityMin)
+                                duty = duty + 4;
+                            else
+                            if (i > (iCapacityMin + 30))
+                                duty = duty - 2;
+                            sendDutyRequest(duty);
+                            parent.setMeasData(u0, r, e_last);
+                        }
+                    }
+                    break;
+                case IBSM_meas_stopped:
                     break;
                 default:
                     //state = IotBatteryStateMachine.IBSM_init;
@@ -269,6 +290,8 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
     double r = Double.NaN;
     IotBatteryStateMachine state = IotBatteryStateMachine.IBSM_init;
     long stateTimer;
+    int iCapacityMin = 100;
+    int iResistance = 60;
 
     private static final long serialVersionUID = -1492376671650452880L;
 }
