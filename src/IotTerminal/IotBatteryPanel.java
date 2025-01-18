@@ -140,7 +140,7 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
     void setI(double newVal)
     {
         long tiNew = System.nanoTime(); // in ns
-        if (u > 0.5) {
+        if ((u > 0.5) && (!Double.isNaN(newVal))) {
             e = e - (((ti - tiNew) * i) / (3600 * 1e9)); // i < 0 - loading
             e_last = e;
         }else {
@@ -275,6 +275,16 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
         stateMachineUpdate();
     }
 
+    static void setIResistance(int i) {
+        iResistance = i;
+        IotTerminalPrefs.put("iResistance", iResistance);
+    }
+
+    static void setICapacity(int i) {
+        iCapacityMin = i;
+        IotTerminalPrefs.put("iCapacityMin", iCapacityMin);
+    }
+
     private final long t_50_msec_in_ns =  50_000_000;
     private final long t_1_sec_in_ns = 1_000_000_000;
     private final long t_2_sec_in_ns = 2 * t_1_sec_in_ns;
@@ -290,8 +300,8 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
     double r = Double.NaN;
     IotBatteryStateMachine state = IotBatteryStateMachine.IBSM_init;
     long stateTimer;
-    int iCapacityMin = 100;
-    int iResistance = 60;
+    static int iCapacityMin = 100;
+    static int iResistance = 60;
 
     private static final long serialVersionUID = -1492376671650452880L;
 }
