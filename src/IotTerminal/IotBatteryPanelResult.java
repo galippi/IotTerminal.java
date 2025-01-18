@@ -13,7 +13,7 @@ public class IotBatteryPanelResult extends JLabel {
         setText("No");
     }
 
-    public void setMeasData(double u0, double r) {
+    public void setMeasData(double u0, double r, double mAh) {
         String msg = "Result: R= ";
         if (Double.isNaN(r))
             msg = msg + "NaN";
@@ -24,6 +24,8 @@ public class IotBatteryPanelResult extends JLabel {
             msg = msg + "NaN";
         else
             msg = msg + String.format("%.3f", u0) + " V";
+        msg = msg + " capacity= ";
+        msg = msg + String.format("%.3f", mAh) + " mAh";
         this.setText(msg);
     }
 

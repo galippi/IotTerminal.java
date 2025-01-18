@@ -359,14 +359,16 @@ class IotDataPanel extends JPanel {
         g.drawString("BaCD", 30, 170);
     }
 
-    public void setMeasData(double _u0, double _r) {
+    public void setMeasData(double _u0, double _r, double _mAh) {
         u0 = _u0;
         r = _r;
-        ibpr.setMeasData(u0, r);
+        mAh = _mAh;
+        ibpr.setMeasData(u0, r, mAh);
     }
 
     double r = Double.NaN;
     double u0 = Double.NaN;
+    double mAh = 0;
 
     IotTerminalMainPanel parent;
     Vector<IotGaugePanel> panels = new Vector<>();
