@@ -110,7 +110,8 @@ class RowHandlerPortName extends RowHandler implements TableCellRenderer
 
     @Override
     void update() {
-        IotComPort.openPort(comPortName);
+        if (!IotComPort.getPortName().equals(comPortName))
+            IotComPort.openPort(comPortName);
     }
 
     @Override
@@ -144,7 +145,8 @@ class RowHandlerBaudRate extends RowHandler
 
     @Override
     void update() {
-        IotComPort.setBaudRate(baudRate);
+        if (IotComPort.getBaudRate() != baudRate)
+            IotComPort.setBaudRate(baudRate);
     }
 
     int baudRate;
@@ -159,7 +161,7 @@ class RowHandlerPollingTime extends RowHandler
 
     @Override
     Object getValue() {
-        return ""+IotComPort.getPollingTime();
+        return "" + IotComPort.getPollingTime();
     }
 
     @Override
@@ -171,7 +173,8 @@ class RowHandlerPollingTime extends RowHandler
 
     @Override
     void update() {
-        IotComPort.setPollingTime(pollingTime);
+        if (IotComPort.getPollingTime() != pollingTime)
+            IotComPort.setPollingTime(pollingTime);
     }
 
     int pollingTime;
