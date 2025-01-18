@@ -22,7 +22,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import config.DbgConfig;
-import lippiWare.utils.bin;
 import lippiWare.utils.dbg;
 import lwLogDataProcessor.LogDataProcessorHandlerBase;
 import lwLogDataProcessor.LogDataProcessorHexu8ArrayBase;
