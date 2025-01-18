@@ -141,7 +141,7 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
     {
         long tiNew = System.nanoTime(); // in ns
         if (u > 0.5) {
-            e = e + (((ti - tiNew) * i) / (3600 * 1e9));
+            e = e - (((ti - tiNew) * i) / (3600 * 1e9)); // i < 0 - loading
             e_last = e;
         }else {
             e = 0;
