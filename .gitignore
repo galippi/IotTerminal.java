@@ -7,5 +7,5 @@ _gitk.bat
 *.bak
 _backup/
 /bin/
-_demo.asc
+_demo*.asc
 _log.log

@@ -1,5 +1,6 @@
 package IotTerminal;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -9,8 +10,14 @@ import lippiWare.utils.LocalDateTimeMy;
 import lippiWare.utils.dbg;
 
 public class IotDataLogger {
+    static final String fileExt = ".asc";
     static void open(String _filename) {
-        filename = _filename;
+        filename = _filename + fileExt;
+        int idx = 0;
+        while ((new File(filename)).exists()) {
+            filename = _filename + "_" + idx + fileExt;
+            idx++;
+        }
         try {
             myWriter = new FileWriter(filename);
             myWriter.write(VectorAscFile.header(LocalDateTimeMy.now()));
@@ -19,12 +26,17 @@ public class IotDataLogger {
             dbg.println(1, "Unable to create file \'" + filename + "\'! e=" + e.toString());
             filename = null;
         }
+        updated = false;
     }
+
+    static boolean updated = false;
 
     static void close() {
         if (myWriter != null)
             try {
                 myWriter.close();
+                if (!updated)
+                    new File(filename).delete();
             } catch (IOException e) {
                 dbg.println(1, "Unable to close file \'" + filename + "\'! e=" + e.toString());
             }
@@ -47,6 +59,7 @@ public class IotDataLogger {
         } catch (IOException e) {
             dbg.println(1, "Unable to write (setU0) to file \'" + filename + "\'! e=" + e.toString());
         }
+        updated = true;
     }
 
     static void setU1(double val) {
@@ -64,6 +77,7 @@ public class IotDataLogger {
         } catch (IOException e) {
             dbg.println(1, "Unable to write (setU1) to file \'" + filename + "\'! e=" + e.toString());
         }
+        updated = true;
     }
 
     static void setI(double val, double mAh) {
@@ -84,6 +98,7 @@ public class IotDataLogger {
         } catch (IOException e) {
             dbg.println(1, "Unable to write (setI) to file \'" + filename + "\'! e=" + e.toString());
         }
+        updated = true;
     }
 
     public static void setDHT(double T, double hum, int dataCtr, int errCtr) {
@@ -113,6 +128,7 @@ public class IotDataLogger {
         } catch (IOException e) {
             dbg.println(1, "Unable to write (setI) to file \'" + filename + "\'! e=" + e.toString());
         }
+        updated = true;
     }
 
     public static void setData(int msgId, byte[] data) {
@@ -124,6 +140,7 @@ public class IotDataLogger {
         } catch (IOException e) {
             dbg.println(1, "Unable to write (setData) to file \'" + filename + "\'! e=" + e.toString());
         }
+        updated = true;
     }
 
     private static long timeStampNow() {

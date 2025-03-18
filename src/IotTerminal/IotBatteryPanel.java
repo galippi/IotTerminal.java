@@ -110,7 +110,7 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
         iResistance = IotTerminalPrefs.get("iResistance", 60);
         iCapacityMin = IotTerminalPrefs.get("iCapacityMin", 100);
 
-        IotDataLogger.open("_demo.asc");
+        IotDataLogger.open("_demo");
 
         Dimension d = new Dimension(2000, 200);
 
