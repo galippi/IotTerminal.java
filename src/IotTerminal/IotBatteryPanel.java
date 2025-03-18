@@ -141,6 +141,8 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
     {
         long tiNew = System.nanoTime(); // in ns
         if ((u > 0.5) && (!Double.isNaN(newVal))) {
+            if (Double.isNaN(e))
+                e = 0;
             e = e - (((ti - tiNew) * i) / (3600 * 1e9)); // i < 0 - loading
             e_last = e;
         }else {
@@ -235,6 +237,7 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
                             else
                             if (i > (iCapacityMin + 30))
                                 duty = duty - 2;
+                            duty = Math.max(duty, 252);
                             sendDutyRequest(duty);
                             parent.setMeasData(u0, r, e_last);
                         }
@@ -252,6 +255,8 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
 
     private void sendDutyRequest(int _duty) {
         dbg.println(19, "IotBatteryPanel.sendDutyRequest _duty=" + _duty);
+        if (_duty > 252)
+            _duty = 252;
         parent.parent.sendIotCommand("SR" + Integer.toHexString(_duty) + '\r');
 //        parent.sendIotCommand("SR" + Integer.toHexString(_duty) + '\r');
     }
