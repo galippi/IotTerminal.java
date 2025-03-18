@@ -194,6 +194,7 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
             if (idx < 0)
                 return;
             rxMessage = rxMessage.substring(idx + 1);
+            rxMessageRest = "";
             rxMessageIsInSync = true;
         }
         rxMessageRest = rxMessageRest + rxMessage;
