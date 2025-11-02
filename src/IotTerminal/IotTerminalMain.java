@@ -1,6 +1,7 @@
 package IotTerminal;
 
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -9,6 +10,7 @@ import javax.swing.JMenuItem;
 import config.DbgConfig;
 import iotDataConnection.IotDataConnectionIf;
 import iotDataConnection.IotDataConnectionSerial;
+import iotDriver.IotDriverList;
 import iotDataConnection.IotDataConnectionRxIf;
 import lippiWare.utils.bin;
 import lippiWare.utils.dbg;
@@ -17,6 +19,7 @@ import lwLogDataProcessor.LogDataProcessorDefaultHandler;
 import lwLogDataProcessor.LogDataProcessorHandlerBase;
 import lwLogDataProcessor.LogDataProcessorHexu16Base;
 import lwLogDataProcessor.LogDataProcessorHexu8ArrayBase;
+import version.VersionInfo;
 
 class IotVoltageHandler extends LogDataProcessorHexu16Base {
     IotVoltageHandler(String prefix, double factor, double offset, IotGaugeVoltage parent) {
@@ -142,6 +145,8 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
         JMenuBar jMenuBarMainMenu = new javax.swing.JMenuBar();
 
         JMenu jMenuFile = new javax.swing.JMenu("File");
+        jMenuBarMainMenu.add(jMenuFile);
+
         JMenuItem m_FileExit = new javax.swing.JMenuItem("Exit");
         m_FileExit.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_MASK));
         m_FileExit.addActionListener(new java.awt.event.ActionListener() {
@@ -151,7 +156,40 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
         });
         jMenuFile.add(m_FileExit);
 
+        JMenu jMenuMeas = new javax.swing.JMenu("Measurement");
+        jMenuBarMainMenu.add(jMenuMeas);
+
+        m_MeasStart = new javax.swing.JMenuItem("Start");
+        jMenuMeas.add(m_MeasStart);
+        m_MeasStart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+              m_MeasStartActionPerformed(evt);
+            }
+          });
+
+        m_MeasStop = new javax.swing.JMenuItem("Stop");
+        jMenuMeas.add(m_MeasStop);
+        m_MeasStop.setEnabled(false);
+        m_MeasStop.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+              m_MeasStopActionPerformed(evt);
+            }
+          });
+
+        JMenu jMenuDevice = new javax.swing.JMenu("Device");
+        jMenuBarMainMenu.add(jMenuDevice);
+
+        JMenuItem m_DeviceSetup = new javax.swing.JMenuItem("Setup");
+        jMenuDevice.add(m_DeviceSetup);
+        m_DeviceSetup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+              m_DeviceSetupActionPerformed(evt);
+            }
+          });
+
         JMenu jMenuTools = new javax.swing.JMenu("Tools");
+        jMenuBarMainMenu.add(jMenuTools);
+
         JMenuItem m_ToolsOptions = new javax.swing.JMenuItem("Options");
         jMenuTools.add(m_ToolsOptions);
         m_ToolsOptions.addActionListener(new java.awt.event.ActionListener() {
@@ -161,12 +199,17 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
           });
 
         JMenu jMenuHelp = new javax.swing.JMenu("Help");
+        jMenuBarMainMenu.add(jMenuHelp);
+
         JMenuItem m_HelpAbout = new javax.swing.JMenuItem("About");
         jMenuHelp.add(m_HelpAbout);
-
-        jMenuBarMainMenu.add(jMenuFile);
-        jMenuBarMainMenu.add(jMenuTools);
-        jMenuBarMainMenu.add(jMenuHelp);
+        m_HelpAbout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                String msgAbout = "IotTerminal demo application\n"
+                        + "Version: " + VersionInfo.version;
+                javax.swing.JOptionPane.showMessageDialog(mainPanel, msgAbout);
+            }
+          });
 
         setJMenuBar(jMenuBarMainMenu);
 
@@ -174,6 +217,29 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
         add(mainPanel);
 
         this.setMinimumSize(new Dimension(400, 300));
+    }
+
+    protected void m_MeasStartActionPerformed(ActionEvent evt) {
+        dbg.println(9, "m_MeasStartActionPerformed");
+        if (IotDriverList.size() > 0)
+            try {
+                IotDriverList.start();
+                m_MeasStart.setEnabled(false);
+                m_MeasStop.setEnabled(true);
+            }catch(Exception e) {
+                IotDriverList.stop();
+            }
+    }
+
+    protected void m_MeasStopActionPerformed(ActionEvent evt) {
+        dbg.println(9, "m_MeasStopActionPerformed");
+        IotDriverList.stop();
+        m_MeasStart.setEnabled(true);
+        m_MeasStop.setEnabled(false);
+    }
+
+    protected void m_DeviceSetupActionPerformed(ActionEvent evt) {
+        dbg.println(9, "m_DeviceSetupActionPerformed");
     }
 
     LogDataProcessorDefaultHandler defaultHandler = new LogDataProcessorDefaultHandler();
@@ -257,6 +323,8 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
 
     static IotTerminalMain frame;
     IotTerminalMainPanel mainPanel;
+    static JMenuItem m_MeasStart;
+    static JMenuItem m_MeasStop;
 
     private static final long serialVersionUID = -240137363597989690L;
 }
