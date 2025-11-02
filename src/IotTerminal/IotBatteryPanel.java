@@ -227,17 +227,21 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
                         state = IotBatteryStateMachine.IBSM_meas_stopped;
                         parent.setMeasData(u0, r, e_last);
                     }else {
-                        if ((t - td) > t_50_msec_in_ns) {
-                            td = td + t_50_msec_in_ns;
-                            if (u < 1)
+                        if ((t - td) > t_200_msec_in_ns) {
+                            td = td + t_200_msec_in_ns;
+                            if (u < 1) {
                                 duty = duty - 4;
-                            else
-                            if (i < iCapacityMin)
+                                dbg.println(19, "IotBatteryPanel Overload u!");
+                            }else
+                            if (i < iCapacityMin) {
                                 duty = duty + 4;
-                            else
-                            if (i > (iCapacityMin + 30))
+                                dbg.println(19, "IotBatteryPanel too low current! " + i);
+                            }else
+                            if (i > (iCapacityMin + 30)) {
                                 duty = duty - 2;
-                            duty = Math.max(duty, 252);
+                                dbg.println(19, "IotBatteryPanel too high current!");
+                            }
+                            //duty = Math.min(duty, 252);
                             sendDutyRequest(duty);
                             parent.setMeasData(u0, r, e_last);
                         }
@@ -249,12 +253,17 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
                     //state = IotBatteryStateMachine.IBSM_init;
                     break;
             }
+            dbg.println(19, "Duty=" + duty);
         }
         data.repaint();
     }
 
     private void sendDutyRequest(int _duty) {
         dbg.println(19, "IotBatteryPanel.sendDutyRequest _duty=" + _duty);
+        if (_duty > 252) {
+            dbg.println(1, "Error: the duty is over the limit!");
+            //System.exit(1);
+        }
         if (_duty > 252)
             _duty = 252;
         parent.parent.sendIotCommand("SR" + Integer.toHexString(_duty) + '\r');
@@ -290,8 +299,9 @@ class IotBatteryPanel extends JPanel implements IotGaugeValueChangeCallback, Act
         IotTerminalPrefs.put("iCapacityMin", iCapacityMin);
     }
 
-    private final long t_50_msec_in_ns =  50_000_000;
-    private final long t_1_sec_in_ns = 1_000_000_000;
+    private final long t_50_msec_in_ns  =    50_000_000;
+    private final long t_200_msec_in_ns =   200_000_000;
+    private final long t_1_sec_in_ns    = 1_000_000_000;
     private final long t_2_sec_in_ns = 2 * t_1_sec_in_ns;
     private final long t_5_sec_in_ns = 5 * t_1_sec_in_ns;
 
