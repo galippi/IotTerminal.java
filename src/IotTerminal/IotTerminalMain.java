@@ -240,6 +240,8 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
 
     protected void m_DeviceSetupActionPerformed(ActionEvent evt) {
         dbg.println(9, "m_DeviceSetupActionPerformed");
+        IotDeviceSetupDlg idsd = new IotDeviceSetupDlg(this);
+        idsd.setVisible(true);
     }
 
     LogDataProcessorDefaultHandler defaultHandler = new LogDataProcessorDefaultHandler();
