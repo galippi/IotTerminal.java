@@ -2,6 +2,7 @@ package IotTerminal;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -52,6 +53,7 @@ class IotDeviceTable extends JPanel {
 public class IotDeviceSetupDlg extends JDialog {
 
     IotDeviceSetupDlg(IotTerminalMain _parent) {
+        super(_parent, Dialog.ModalityType.APPLICATION_MODAL);
         parent = _parent;
         this.setTitle("Device setup");
 
