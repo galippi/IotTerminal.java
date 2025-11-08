@@ -50,6 +50,33 @@ class IotDeviceTable extends JPanel {
     private static final long serialVersionUID = 7799538399508125604L;
 }
 
+class IotChannelsTable extends JPanel {
+    IotChannelsTable() {
+        super(new BorderLayout());
+        JTable table = new JTable(2, columnNames.length);
+        javax.swing.table.TableColumnModel columnModel = table.getColumnModel();
+        for (int i = 0; i < columnNames.length; i++)
+        {
+            TableColumn column = columnModel.getColumn(i);
+            column.setMinWidth(50);
+            column.setMaxWidth(1000);
+            column.setWidth(50);
+            column.setResizable(true);
+            column.setHeaderValue(columnNames[i]);
+        }
+
+        JScrollPane scrollableTable = new JScrollPane(table);
+        scrollableTable.setMinimumSize(new Dimension(350, 200));
+        add(scrollableTable);
+    }
+
+    final String[] columnNames = new String[] {
+            "Channel name", "Channel index", "Device name", "Device index", "Channel sub index"
+        };
+
+    private static final long serialVersionUID = 7799538399508125604L;
+}
+
 public class IotDeviceSetupDlg extends JDialog {
 
     IotDeviceSetupDlg(IotTerminalMain _parent) {
@@ -59,7 +86,7 @@ public class IotDeviceSetupDlg extends JDialog {
 
         IotDeviceTable scrollableTable = new IotDeviceTable();
 
-        JPanel channelsPanel = new JPanel();
+        IotChannelsTable channelsPanel = new IotChannelsTable();
         //channelsPanel.setMinimumSize(new Dimension(350, 200));
         JScrollPane channelsPane = new JScrollPane(channelsPanel);
         channelsPane.setMinimumSize(new Dimension(350, 200));
