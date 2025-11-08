@@ -14,20 +14,37 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
+import javax.swing.table.TableColumn;
 
 import lippiWare.utils.dbg;
 
 class IotDeviceTable extends JPanel {
     IotDeviceTable() {
         super(new BorderLayout());
-        JPanel myTable = new JPanel();
-        JScrollPane scrollableTable = new JScrollPane(myTable);
+        JTable table = new JTable(2, columnNames.length);
+        javax.swing.table.TableColumnModel columnModel = table.getColumnModel();
+        for (int i = 0; i < columnNames.length; i++)
+        {
+            TableColumn column = columnModel.getColumn(i);
+            column.setMinWidth(50);
+            column.setMaxWidth(1000);
+            column.setWidth(50);
+            column.setResizable(true);
+            column.setHeaderValue(columnNames[i]);
+        }
+
+        JScrollPane scrollableTable = new JScrollPane(table);
         scrollableTable.setMinimumSize(new Dimension(350, 200));
         add(scrollableTable);
     }
+
+    final String[] columnNames = new String[] {
+            "Device name", "Number of configured channels"
+        };
 
     private static final long serialVersionUID = 7799538399508125604L;
 }
@@ -50,6 +67,36 @@ public class IotDeviceSetupDlg extends JDialog {
         JPanel horizontalSplit = new JPanel(new BorderLayout());
         horizontalSplit.add(jsp);
         horizontalSplit.setMinimumSize(new Dimension(350, 400));
+
+        JPanel buttons = new JPanel();
+
+        JButton bAdd = new JButton("Add");
+        bAdd.setHorizontalAlignment(SwingConstants.LEFT);
+        bAdd.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+
+        JButton bRemove = new JButton("Remove");
+        bRemove.setHorizontalAlignment(SwingConstants.LEFT);
+        bRemove.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+
+        JButton bConfigure = new JButton("Configure");
+        bConfigure.setHorizontalAlignment(SwingConstants.LEFT);
+        bConfigure.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+
+        buttons.add(bAdd);
+        buttons.add(bRemove);
+        buttons.add(bConfigure);
 
         JButton bOk = new JButton("OK");
         bOk.setHorizontalAlignment(SwingConstants.LEFT);
@@ -77,10 +124,16 @@ public class IotDeviceSetupDlg extends JDialog {
         cp.setLayout(layout);
 
         cp.add(horizontalSplit);
+        cp.add(buttons);
         cp.add(bOkCancel);
 
+        layout.putConstraint(SpringLayout.WEST,  buttons, -95, SpringLayout.EAST,  cp);
+        layout.putConstraint(SpringLayout.EAST,  buttons,  -5, SpringLayout.EAST,  cp);
+        layout.putConstraint(SpringLayout.NORTH, buttons,  5, SpringLayout.NORTH, cp);
+        layout.putConstraint(SpringLayout.SOUTH, buttons, -5, SpringLayout.NORTH, bOkCancel);
+
         layout.putConstraint(SpringLayout.WEST,  horizontalSplit,  5, SpringLayout.WEST,  cp);
-        layout.putConstraint(SpringLayout.EAST,  horizontalSplit, -5, SpringLayout.EAST,  cp);
+        layout.putConstraint(SpringLayout.EAST,  horizontalSplit, -5, SpringLayout.WEST,  buttons);
         layout.putConstraint(SpringLayout.NORTH, horizontalSplit,  5, SpringLayout.NORTH, cp);
         layout.putConstraint(SpringLayout.SOUTH, horizontalSplit, -5, SpringLayout.NORTH, bOkCancel);
 
