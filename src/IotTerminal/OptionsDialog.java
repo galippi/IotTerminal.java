@@ -180,60 +180,6 @@ class RowHandlerPollingTime extends RowHandler
     int pollingTime;
 }
 
-class RowHandlerCurrentResistance extends RowHandler
-{
-    @Override
-    String getName() {
-        return "Load current under resistance measurement [mA]";
-    }
-
-    @Override
-    Object getValue() {
-        return "" + IotBatteryPanel.iResistance;
-    }
-
-    @Override
-    void setValue(Object newValue) throws Exception {
-        iLoad = Integer.parseInt((String)newValue);
-        if ((iLoad < 10) || (iLoad > 1200))
-            throw new Exception("Invalid load current");
-    }
-
-    @Override
-    void update() {
-        IotBatteryPanel.setIResistance(iLoad);
-    }
-
-    int iLoad;
-}
-
-class RowHandlerCurrentCapacity extends RowHandler
-{
-    @Override
-    String getName() {
-        return "Load current for capacity measurement [mA]";
-    }
-
-    @Override
-    Object getValue() {
-        return "" + IotBatteryPanel.iCapacityMin;
-    }
-
-    @Override
-    void setValue(Object newValue) throws Exception {
-        iCapacity = Integer.parseInt((String)newValue);
-        if ((iCapacity < 10) || (iCapacity > 5000))
-            throw new Exception("Invalid load current for capacity measurement");
-    }
-
-    @Override
-    void update() {
-        IotBatteryPanel.setICapacity(iCapacity);
-    }
-
-    int iCapacity;
-}
-
 class OptionDialogRowListHandler
 {
     RowHandler addRow(RowHandler row)
@@ -278,8 +224,6 @@ public class OptionsDialog extends JDialog {
     odrlh.addRow(rhpn);
     odrlh.addRow(new RowHandlerBaudRate());
     odrlh.addRow(new RowHandlerPollingTime());
-    odrlh.addRow(new RowHandlerCurrentResistance());
-    odrlh.addRow(new RowHandlerCurrentCapacity());
 
     //create table with data
     table = new JTable(new DefaultTableModel(odrlh.getRowCount(), columnNames.length) {

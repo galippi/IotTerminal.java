@@ -8,64 +8,11 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 import config.DbgConfig;
-import iotDataConnection.IotDataConnectionIf;
-import iotDataConnection.IotDataConnectionSerial;
 import iotDriver.IotDriverList;
-import iotDataConnection.IotDataConnectionRxIf;
-import lippiWare.utils.bin;
 import lippiWare.utils.dbg;
-import lwLogDataProcessor.LogDataProcessor;
-import lwLogDataProcessor.LogDataProcessorDefaultHandler;
-import lwLogDataProcessor.LogDataProcessorHandlerBase;
-import lwLogDataProcessor.LogDataProcessorHexu16Base;
-import lwLogDataProcessor.LogDataProcessorHexu8ArrayBase;
 import version.VersionInfo;
 
-class IotVoltageHandler extends LogDataProcessorHexu16Base {
-    IotVoltageHandler(String prefix, double factor, double offset, IotGaugeVoltage parent) {
-        super(prefix);
-        this.parent = parent;
-        this.factor = factor;
-        this.offset = offset;
-    }
-
-    @Override
-    public void process(int data, String rest) {
-        parent.setValue((data * factor) + offset);
-    }
-    IotGaugeVoltage parent;
-    double factor, offset;
-}
-
-class IotDht11Handler extends LogDataProcessorHexu8ArrayBase {
-    IotDht11Handler(String prefix, IotGaugeDht11 parent) {
-        super(prefix);
-        this.parent = parent;
-    }
-
-    @Override
-    public void process(byte[] data, String rest) {
-        parent.setValue(data);
-    }
-
-    IotGaugeDht11 parent;
-}
-
-class IotDbg00Handler extends LogDataProcessorHandlerBase {
-    IotDbg00Handler(String prefix, IotGaugeString parent) {
-        super(prefix);
-        this.parent = parent;
-    }
-
-    @Override
-    public void process(String data) {
-        parent.setValue(data);
-    }
-
-    IotGaugeString parent;
-}
-
-public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnectionRxIf {
+public class IotTerminalMain extends javax.swing.JFrame {
     public static void main(String[] args) {
         //dbg.set(IotTerminalPrefs.get("Debug level", 1));
         dbg.setLevelMask(DbgConfig.dbgLevelMask);
@@ -121,23 +68,7 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
         setLocation(IotTerminalPrefs.get("MainWindowX", 0), IotTerminalPrefs.get("MainWindowY", 0));
         setSize(IotTerminalPrefs.get("MainWindowW", 600), IotTerminalPrefs.get("MainWindowH", 400));
         setExtendedState(IotTerminalPrefs.get("MainWindowState", NORMAL));
-        for (int i = 0; true; i++) {
-            IotGaugePanel p = mainPanel.getPanel(i);
-            if (p == null)
-                break;
-            ldp.addHandler(p.getLogDataProcessorHandler());
-        }
-        try {
-            //String path = System.getenv("PATH");
-            iotDataConnection = new IotDataConnectionSerial(this);
-        } catch (Exception e) {
-            dbg.println(1, "IotTerminalMain.ctor exception e=" + e.toString());
-            //e.printStackTrace();
-            System.exit(1);
-        }
     }
-    LogDataProcessor ldp = new LogDataProcessor();
-    IotDataConnectionIf iotDataConnection;
 
     private void initComponents() {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -244,57 +175,14 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
         idsd.setVisible(true);
     }
 
-    LogDataProcessorDefaultHandler defaultHandler = new LogDataProcessorDefaultHandler();
-
-    @Override
-    public void rxCallback(byte[] data, int num) {
-        String rxMessage = new String(data, 0, num);
-        //String rxMessage = new String(data, 0, num, Charset.forName("US-ASCII"));
-        addLog(rxMessage);
-        if (false) {
-            String str = bin.toString(data, num);
-            addLog(str + "\n");
-            dbg.println(11, "rxCallback str=" + str);
-        }
-        rxMessage = rxMessage.replace('\r', '\n');
-        if (!rxMessageIsInSync) {
-            int idx = rxMessage.indexOf('\n');
-            if (idx < 0)
-                return;
-            rxMessage = rxMessage.substring(idx + 1);
-            rxMessageRest = "";
-            rxMessageIsInSync = true;
-        }
-        rxMessageRest = rxMessageRest + rxMessage;
-        int idx;
-        while ((idx = rxMessageRest.indexOf('\n')) >= 0) {
-            if (idx > 0) {
-                rxMessage = rxMessageRest.substring(0, idx);
-                dbg.println(11, "Rx:" + rxMessage);
-                ldp.process(rxMessage, defaultHandler);
-            }
-            rxMessageRest = rxMessageRest.substring(idx + 1);
-        }
-    }
-    boolean rxMessageIsInSync = false;
-    String rxMessageRest = "";
-
-    public void processRxMessage(String rxMessage) {
-        ldp.process(rxMessage, defaultHandler);
-    }
-
     public void addLog(String msg) {
         mainPanel.addLog(msg);
-    }
-
-    public void sendIotCommand(String cmd) {
-        iotDataConnection.sendIotCommand(cmd);
     }
 
     public void windowClose(java.awt.event.WindowEvent e)
     {
       dbg.println(9, "windowClose");
-      iotDataConnection.close();
+      IotDriverList.close();
       this.setVisible(false);
 
       IotDataLogger.close();

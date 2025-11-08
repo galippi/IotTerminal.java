@@ -25,7 +25,7 @@ public class IotDriverList {
         }
     }
 
-    static void close() {
+    public static void close() {
         for (IotDriverBase driver : driverList) {
             driver.close();
         }

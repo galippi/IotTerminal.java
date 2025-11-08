@@ -66,7 +66,7 @@ public class IotDataConnection implements ActionListener, IotDataConnectionIf {
     public void actionPerformed(ActionEvent arg0) {
         dbg.println(9, "IotDataConnection.actionPerformed");
         parent.addLog("Rx: " + rxMessage);
-        parent.processRxMessage(rxMessage);
+        //parent.processRxMessage(rxMessage);
         scheduleMessage();
     }
 
