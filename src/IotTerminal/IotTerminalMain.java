@@ -17,6 +17,7 @@ import lwLogDataProcessor.LogDataProcessorDefaultHandler;
 import lwLogDataProcessor.LogDataProcessorHandlerBase;
 import lwLogDataProcessor.LogDataProcessorHexu16Base;
 import lwLogDataProcessor.LogDataProcessorHexu8ArrayBase;
+import version.VersionInfo;
 
 class IotVoltageHandler extends LogDataProcessorHexu16Base {
     IotVoltageHandler(String prefix, double factor, double offset, IotGaugeVoltage parent) {
