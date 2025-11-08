@@ -161,8 +161,16 @@ public class IotTerminalMain extends javax.swing.JFrame implements IotDataConnec
           });
 
         JMenu jMenuHelp = new javax.swing.JMenu("Help");
+
         JMenuItem m_HelpAbout = new javax.swing.JMenuItem("About");
         jMenuHelp.add(m_HelpAbout);
+        m_HelpAbout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                String msgAbout = "IotTerminal demo application\n"
+                        + "Version: " + VersionInfo.version;
+                javax.swing.JOptionPane.showMessageDialog(mainPanel, msgAbout);
+            }
+          });
 
         jMenuBarMainMenu.add(jMenuFile);
         jMenuBarMainMenu.add(jMenuTools);
