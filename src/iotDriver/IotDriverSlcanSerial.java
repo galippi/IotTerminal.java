@@ -1,6 +1,7 @@
 package iotDriver;
 
 import java.awt.Dialog;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,10 +10,13 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import IotTerminal.IotDeviceSetupDlg;
+import IotTerminal.IotTerminalPrefs;
 import iotDataConnection.IotComPort;
 import lippiWare.utils.dbg;
 
@@ -26,6 +30,9 @@ class IotSlcanConfigDlg extends IotDriverBaseConfigDlg {
         String[] ports = IotComPort.getAvailablePorts();
         box = new JComboBox<>(ports);
         box.setSelectedItem(parent.portName);
+
+        JLabel lbBaud = new JLabel("Baud rate:");
+        tBaud = new JTextField("" + parent.baud);
 
         JButton bOk = new JButton("OK");
         bOk.setHorizontalAlignment(SwingConstants.LEFT);
@@ -53,25 +60,58 @@ class IotSlcanConfigDlg extends IotDriverBaseConfigDlg {
 
         add(lbPort);
         add(box);
+        add(lbBaud);
+        add(tBaud);
         add(bOkCancel);
         pack();
+        
+        setLocation(IotTerminalPrefs.get("IotSlcanConfigDlgX", 0), IotTerminalPrefs.get("IotSlcanConfigDlgY", 0));
+        setSize(IotTerminalPrefs.get("IotSlcanConfigDlgW", 200), IotTerminalPrefs.get("IotSlcanConfigDlgH", 150));
+        this.setMinimumSize(new Dimension(200, 100));
     }
 
     private void okHandler() {
         dbg.println(9, "IotSlcanConfigDlg.okHandler.actionPerformed");
         setVisible(false);
+        String errorMsg = null;
+
         String comPortName = (String)box.getSelectedItem();
         if ((comPortName.length() < 1) || (!IotComPort.isComPortValid(comPortName))) {
-            // TODO
             dbg.println(9, "IotSlcanConfigDlg.okHandler - not valid selection comPortName=" + comPortName);
-        }else {
-            dbg.println(9, "IotSlcanConfigDlg.okHandler - valid selection comPortName=" + comPortName);
-            parent.portName = comPortName;
+            errorMsg = "Not valid selection comPortName=" + comPortName;
         }
+
+        String baud = tBaud.getText();
+        int baudVal = -1;
+        try {
+            baudVal = Integer.parseInt(baud);
+            if ((baudVal < 100) || (baudVal > 999999))
+                throw new Exception("Invalid baud rate value " + baud + "!");
+        }catch(Exception e) {
+            dbg.println(9, "IotSlcanConfigDlg.okHandler - not valid selection comPortName=" + comPortName);
+            errorMsg = "Not valid baud rate value=" + baud;
+        }
+
+        if (errorMsg != null) {
+            dbg.println(9, "IotSlcanConfigDlg.okHandler - not valid selection comPortName=" + comPortName);
+            JOptionPane.showMessageDialog(IotDeviceSetupDlg.idsd, errorMsg, "Error", JOptionPane.ERROR_MESSAGE);
+            setVisible(true);
+            return;
+        }
+
+        dbg.println(9, "IotSlcanConfigDlg.okHandler - valid selection comPortName=" + comPortName + " baud=" + baudVal);
+        parent.portName = comPortName;
+        parent.baud = baudVal;
+
+        IotTerminalPrefs.put("IotSlcanConfigDlgX", getX());
+        IotTerminalPrefs.put("IotSlcanConfigDlgY", getY());
+        IotTerminalPrefs.put("IotSlcanConfigDlgH", getHeight());
+        IotTerminalPrefs.put("IotSlcanConfigDlgW", getWidth());
     }
 
     IotDriverSlcanSerial parent;
     private JComboBox<String> box;
+    private JTextField tBaud;
 
     private static final long serialVersionUID = 9090788248731657889L;
 }
@@ -85,8 +125,7 @@ public class IotDriverSlcanSerial implements IotDriverBase {
 
     @Override
     public void start() throws Exception {
-        // TODO Auto-generated method stub
-        
+        throw new Exception("IotDriverSlcanSerial - Not yet implemented portName=" + portName);
     }
 
     @Override
@@ -131,5 +170,6 @@ public class IotDriverSlcanSerial implements IotDriverBase {
     }
 
     String portName;
+    int baud = 1200;
     IotDriverBaseConfigDlg dlg;
 }
