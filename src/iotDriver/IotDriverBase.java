@@ -9,4 +9,6 @@ public interface IotDriverBase {
     void close();
     void init(int channelIdx, Object initData);
     void checkConfig(final Vector<IotDriverBase> driverList);
+    IotDriverBase create();
+    String getName();
 }

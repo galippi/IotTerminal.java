@@ -8,7 +8,9 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 import config.DbgConfig;
-import iotDriver.IotDriverList;
+import iotDriver.IotActivatedDriverList;
+import iotDriver.IotAvailableDriverList;
+import iotDriver.IotDriverSlcanSerial;
 import lippiWare.utils.dbg;
 import version.VersionInfo;
 
@@ -46,6 +48,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
+                IotAvailableDriverList.add(new IotDriverSlcanSerial());
                 frame = new IotTerminalMain();
                 frame.setVisible(true);
             // ------------------------------------------------------------
@@ -152,19 +155,19 @@ public class IotTerminalMain extends javax.swing.JFrame {
 
     protected void m_MeasStartActionPerformed(ActionEvent evt) {
         dbg.println(9, "m_MeasStartActionPerformed");
-        if (IotDriverList.size() > 0)
+        if (IotActivatedDriverList.size() > 0)
             try {
-                IotDriverList.start();
+                IotActivatedDriverList.start();
                 m_MeasStart.setEnabled(false);
                 m_MeasStop.setEnabled(true);
             }catch(Exception e) {
-                IotDriverList.stop();
+                IotActivatedDriverList.stop();
             }
     }
 
     protected void m_MeasStopActionPerformed(ActionEvent evt) {
         dbg.println(9, "m_MeasStopActionPerformed");
-        IotDriverList.stop();
+        IotActivatedDriverList.stop();
         m_MeasStart.setEnabled(true);
         m_MeasStop.setEnabled(false);
     }
@@ -182,7 +185,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
     public void windowClose(java.awt.event.WindowEvent e)
     {
       dbg.println(9, "windowClose");
-      IotDriverList.close();
+      IotActivatedDriverList.close();
       this.setVisible(false);
 
       IotDataLogger.close();

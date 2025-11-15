@@ -2,8 +2,8 @@ package iotDriver;
 
 import java.util.Vector;
 
-public class IotDriverList {
-    static void add(IotDriverBase driver) {
+public class IotActivatedDriverList {
+    public static void add(IotDriverBase driver) {
         driverList.add(driver);
     }
 
@@ -39,6 +39,10 @@ public class IotDriverList {
 
     public static int size() {
         return driverList.size();
+    }
+
+    public static IotDriverBase get(int idx) {
+        return driverList.get(idx);
     }
 
     static Vector<IotDriverBase> driverList = new Vector<>();

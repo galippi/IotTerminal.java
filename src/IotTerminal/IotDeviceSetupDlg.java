@@ -19,14 +19,20 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 
+import iotDriver.IotActivatedDriverList;
+import iotDriver.IotAvailableDriverList;
+import iotDriver.IotDriverBase;
 import lippiWare.utils.dbg;
 
 class IotDeviceTable extends JPanel {
     IotDeviceTable() {
         super(new BorderLayout());
-        JTable table = new JTable(2, columnNames.length);
+        table = new JTable(2, columnNames.length);
+        table.setModel( new javax.swing.table.DefaultTableModel(columnNames, IotActivatedDriverList.size()));
         javax.swing.table.TableColumnModel columnModel = table.getColumnModel();
         for (int i = 0; i < columnNames.length; i++)
         {
@@ -38,14 +44,30 @@ class IotDeviceTable extends JPanel {
             column.setHeaderValue(columnNames[i]);
         }
 
+        fillRowData();
+
         JScrollPane scrollableTable = new JScrollPane(table);
         scrollableTable.setMinimumSize(new Dimension(350, 200));
         add(scrollableTable);
     }
 
-    final String[] columnNames = new String[] {
+    public void fillRowData() {
+        DefaultTableModel model = (DefaultTableModel)table.getModel();
+        model.setRowCount(IotActivatedDriverList.size());
+        for(int i = 0; i < IotActivatedDriverList.size(); i++) {
+            IotDriverBase driver = IotActivatedDriverList.get(i);
+            table.setValueAt(driver.getName(), i, colName);
+            table.setValueAt("" + driver.getSubchannelNumber(), i, colChNum);
+        }
+    }
+
+    private JTable table;
+
+    static final String[] columnNames = new String[] {
             "Device name", "Number of configured channels"
         };
+    static final int colName = 0;
+    static final int colChNum = 1;
 
     private static final long serialVersionUID = 7799538399508125604L;
 }
@@ -78,13 +100,12 @@ class IotChannelsTable extends JPanel {
 }
 
 public class IotDeviceSetupDlg extends JDialog {
-
     IotDeviceSetupDlg(IotTerminalMain _parent) {
         super(_parent, Dialog.ModalityType.APPLICATION_MODAL);
         parent = _parent;
         this.setTitle("Device setup");
 
-        IotDeviceTable scrollableTable = new IotDeviceTable();
+        scrollableTable = new IotDeviceTable();
 
         IotChannelsTable channelsPanel = new IotChannelsTable();
         //channelsPanel.setMinimumSize(new Dimension(350, 200));
@@ -104,6 +125,7 @@ public class IotDeviceSetupDlg extends JDialog {
         bAdd.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                addHandler();
             }
         });
 
@@ -218,7 +240,19 @@ public class IotDeviceSetupDlg extends JDialog {
         IotTerminalPrefs.put("DeviceSetupVerticalSplit", jsp.getDividerLocation());
     }
 
+    protected void addHandler() {
+        IotActivateDriver iad = new IotActivateDriver(this);
+        iad.setVisible(true);
+    }
+
+    public void updateDeviceList() {
+        //fillRowData();
+        scrollableTable.fillRowData();
+    }
+
     IotTerminalMain parent;
     JSplitPane jsp;
+    private IotDeviceTable scrollableTable;
+
     private static final long serialVersionUID = 8080722709719513891L;
 }
