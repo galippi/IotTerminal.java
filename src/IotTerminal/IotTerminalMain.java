@@ -2,10 +2,18 @@ package IotTerminal;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.InputStream;
 
+import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import config.DbgConfig;
 import iotDriver.IotActivatedDriverList;
@@ -83,8 +91,26 @@ public class IotTerminalMain extends javax.swing.JFrame {
         JMenu jMenuFile = new javax.swing.JMenu("File");
         jMenuBarMainMenu.add(jMenuFile);
 
+        JMenuItem m_FileOpen = new javax.swing.JMenuItem("Open");
+        m_FileOpen.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        m_FileOpen.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+              m_FileOpenActionPerformed();
+            }
+          });
+        jMenuFile.add(m_FileOpen);
+
+        JMenuItem m_FileSave = new javax.swing.JMenuItem("Save");
+        m_FileSave.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        m_FileSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+              m_FileSaveActionPerformed();
+            }
+          });
+        jMenuFile.add(m_FileSave);
+
         JMenuItem m_FileExit = new javax.swing.JMenuItem("Exit");
-        m_FileExit.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_MASK));
+        m_FileExit.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_DOWN_MASK));
         m_FileExit.addActionListener(new java.awt.event.ActionListener() {
           public void actionPerformed(java.awt.event.ActionEvent evt) {
             m_FileExitActionPerformed(evt);
@@ -153,6 +179,77 @@ public class IotTerminalMain extends javax.swing.JFrame {
         add(mainPanel);
 
         this.setMinimumSize(new Dimension(400, 300));
+    }
+
+    protected void m_FileOpenActionPerformed() {
+        dbg.println(9, "IotTerminalMain.m_FileOpenActionPerformed");
+
+        final JFileChooser fc = new JFileChooser();
+
+        fc.setFileFilter(
+                new javax.swing.filechooser.FileNameExtensionFilter(
+                    "IOT measurement steup file", "json"));
+
+        int returnVal = fc.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION)
+        {
+          java.io.File file = fc.getSelectedFile();
+          dbg.println(9, "IotTerminalMain.m_FileOpenActionPerformed opening: " + file.getName() + ".");
+          openSetupFile(file.getPath());
+        } else
+        {
+          dbg.println(9, "IotTerminalMain.m_FileOpenActionPerformed - Open command cancelled by user.");
+        }
+    }
+
+    private void openSetupFile(String fileName) {
+        InputStream is;
+        try {
+            is = new FileInputStream(fileName);
+            JSONTokener tokener = new JSONTokener(is);
+            JSONObject jsonObject = new JSONObject(tokener);
+            IotActivatedDriverList.setJson(jsonObject);
+        } catch (Exception e) {
+            String errorMsg = "IotTerminalMain.openSetupFile - unable to open or load file " + fileName + "!\ne=" + e.toString() + "\n";
+            dbg.println(1, errorMsg);
+            JOptionPane.showMessageDialog(IotDeviceSetupDlg.idsd, errorMsg, "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    }
+
+    private void m_FileSaveActionPerformed() {
+        dbg.println(9, "IotTerminalMain.m_FileSaveActionPerformed");
+
+        final JFileChooser fc = new JFileChooser();
+        fc.setDialogType(JFileChooser.SAVE_DIALOG);
+
+        fc.setFileFilter(
+                new javax.swing.filechooser.FileNameExtensionFilter(
+                    "IOT measurement steup file", "json"));
+
+        int returnVal = fc.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION)
+        {
+          java.io.File file = fc.getSelectedFile();
+          dbg.println(9, "IotTerminalMain.m_FileSaveActionPerformed opening: " + file.getName() + ".");
+          saveSetupFile(file.getPath());
+        } else
+        {
+          dbg.println(9, "IotTerminalMain.m_FileSaveActionPerformed - Save command cancelled by user.");
+        }
+    }
+
+    private void saveSetupFile(String filename) {
+        //final String fileNameExtension = "json";
+        try {
+            FileWriter myWriter = new FileWriter(filename);
+            JSONObject jsonObject = IotActivatedDriverList.getJson();
+            myWriter.write(jsonObject.toString());
+            myWriter.close();
+            dbg.dprintf(9, "DataVisualizerLayoutFileLoader.saveLayoutFile(%s) done!\n", filename);
+        } catch (Exception e) {
+            dbg.dprintf(1, "Exception DataVisualizerLayoutFileLoader.saveLayoutFile(%s) e=%s!\n", filename, e.toString());
+        }
     }
 
     protected void m_MeasStartActionPerformed(ActionEvent evt) {

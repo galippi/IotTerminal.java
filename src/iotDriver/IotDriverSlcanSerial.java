@@ -169,6 +169,29 @@ public class IotDriverSlcanSerial implements IotDriverBase {
         return dlg;
     }
 
+    @Override
+    public String getConfig() {
+        return portName + ";" + baud;
+    }
+
+    @Override
+    public void setConfig(String configStr) throws Exception {
+        String[] configArray = configStr.split(";");
+        if (configArray.length != 2) {
+            String msg = "IotDriverSlcanSerial.setConfig - number of parameters are wrong name=" + getName() + " configStr=" + configStr;
+            dbg.println(9, msg);
+            throw new Exception(msg);
+        }
+        portName = configArray[0];
+        try {
+            baud = Integer.parseUnsignedInt(configArray[1]);
+        }catch (Exception e) {
+            String msg = "IotDriverSlcanSerial.setConfig - wrong baud name=" + getName() + " baud=" + configArray[1] + " e=" + e.toString();
+            dbg.println(9, msg);
+            throw new Exception(msg);
+        }
+    }
+
     String portName;
     int baud = 1200;
     IotDriverBaseConfigDlg dlg;

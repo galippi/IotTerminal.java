@@ -12,4 +12,6 @@ public interface IotDriverBase {
     IotDriverBase create();
     String getName();
     IotDriverBaseConfigDlg getConfigDlg();
+    String getConfig();
+    void setConfig(String config) throws Exception;
 }

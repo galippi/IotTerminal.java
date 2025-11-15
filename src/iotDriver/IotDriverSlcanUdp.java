@@ -54,4 +54,15 @@ public class IotDriverSlcanUdp implements IotDriverBase {
         return null;
     }
 
+    @Override
+    public String getConfig() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setConfig(String config) throws Exception {
+        // TODO Auto-generated method stub
+        throw new Exception("IotDriverSlcanUdp.setConfig - not yet implemented config=" + config);
+    }
 }
