@@ -109,6 +109,15 @@ public class IotTerminalMain extends javax.swing.JFrame {
           });
         jMenuFile.add(m_FileSave);
 
+        JMenuItem m_FileSaveAs = new javax.swing.JMenuItem("Save as");
+        m_FileSaveAs.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_DOWN_MASK + java.awt.event.InputEvent.ALT_DOWN_MASK));
+        m_FileSaveAs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+              m_FileSaveAsActionPerformed();
+            }
+          });
+        jMenuFile.add(m_FileSaveAs);
+
         JMenuItem m_FileExit = new javax.swing.JMenuItem("Exit");
         m_FileExit.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_DOWN_MASK));
         m_FileExit.addActionListener(new java.awt.event.ActionListener() {
@@ -188,7 +197,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
 
         fc.setFileFilter(
                 new javax.swing.filechooser.FileNameExtensionFilter(
-                    "IOT measurement steup file", "json"));
+                    "IOT measurement setup file", "json"));
 
         int returnVal = fc.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION)
@@ -217,22 +226,14 @@ public class IotTerminalMain extends javax.swing.JFrame {
         }
     }
 
+    String measConfigFilename;
+
     private void m_FileSaveActionPerformed() {
         dbg.println(9, "IotTerminalMain.m_FileSaveActionPerformed");
-
-        final JFileChooser fc = new JFileChooser();
-        fc.setDialogType(JFileChooser.SAVE_DIALOG);
-
-        fc.setFileFilter(
-                new javax.swing.filechooser.FileNameExtensionFilter(
-                    "IOT measurement steup file", "json"));
-
-        int returnVal = fc.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION)
+        if (measConfigFilename != null)
         {
-          java.io.File file = fc.getSelectedFile();
-          dbg.println(9, "IotTerminalMain.m_FileSaveActionPerformed opening: " + file.getName() + ".");
-          saveSetupFile(file.getPath());
+          dbg.println(9, "IotTerminalMain.m_FileSaveActionPerformed saving: " + measConfigFilename + ".");
+          saveSetupFile(measConfigFilename);
         } else
         {
           dbg.println(9, "IotTerminalMain.m_FileSaveActionPerformed - Save command cancelled by user.");
@@ -246,9 +247,49 @@ public class IotTerminalMain extends javax.swing.JFrame {
             JSONObject jsonObject = IotActivatedDriverList.getJson();
             myWriter.write(jsonObject.toString());
             myWriter.close();
-            dbg.dprintf(9, "DataVisualizerLayoutFileLoader.saveLayoutFile(%s) done!\n", filename);
+            dbg.dprintf(9, "IotTerminalMain.saveSetupFile(%s) done!\n", filename);
+            measConfigFilename = filename;
+            this.setTitle("IotTerminal" + filename);
         } catch (Exception e) {
-            dbg.dprintf(1, "Exception DataVisualizerLayoutFileLoader.saveLayoutFile(%s) e=%s!\n", filename, e.toString());
+            dbg.dprintf(1, "IotTerminalMain.saveSetupFile exception (%s) e=%s!\n", filename, e.toString());
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Unable to save measurement setup " + filename +"!\nDetailed info: " + e.toString(),
+                    "Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    protected void m_FileSaveAsActionPerformed() {
+        dbg.println(9, "IotTerminalMain.m_FileSaveActionPerformed");
+
+        final JFileChooser fc = new JFileChooser();
+        fc.setDialogType(JFileChooser.SAVE_DIALOG);
+
+        fc.setFileFilter(
+                new javax.swing.filechooser.FileNameExtensionFilter(
+                    "IOT measurement setup file", "json"));
+
+        int returnVal = fc.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION)
+        {
+          java.io.File file = fc.getSelectedFile();
+          dbg.println(9, "IotTerminalMain.m_FileSaveActionPerformed saving: " + file.getName() + ".");
+          if (file.exists()) {
+              int answer = JOptionPane.showConfirmDialog(
+                      this,
+                      "The file already exist! Would you like to overwrite it?",
+                      "Warning",
+                      JOptionPane.OK_CANCEL_OPTION);
+              dbg.println(9, "IotTerminalMain.m_FileSaveActionPerformed warning answer=" + answer);
+              if (answer != JOptionPane.OK_OPTION) {
+                  dbg.println(9, "IotTerminalMain.m_FileSaveActionPerformed SavAs is aborted");
+                  return;
+              }
+          }
+          saveSetupFile(file.getPath());
+        } else
+        {
+          dbg.println(9, "IotTerminalMain.m_FileSaveActionPerformed - Save command cancelled by user.");
         }
     }
 
