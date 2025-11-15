@@ -11,8 +11,7 @@ public class IotDriverSlcanUdp implements IotDriverBase {
 
     @Override
     public void start() throws Exception {
-        // TODO Auto-generated method stub
-        
+        throw new Exception("IotDriverSlcanSerial - Not yet implemented!");
     }
 
     @Override
