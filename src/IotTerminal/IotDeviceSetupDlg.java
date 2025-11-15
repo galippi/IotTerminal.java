@@ -106,6 +106,7 @@ public class IotDeviceSetupDlg extends JDialog {
         super(_parent, Dialog.ModalityType.APPLICATION_MODAL);
         parent = _parent;
         this.setTitle("Device setup");
+        idsd = this;
 
         devicesActivated = new IotDeviceTable();
         devicesActivated.table.getSelectionModel().addListSelectionListener(
@@ -147,7 +148,7 @@ public class IotDeviceSetupDlg extends JDialog {
         bRemove.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dbg.println(9, "IotDeviceSetupDlg.Remove.actionPerformed" + e.toString());
+                dbg.println(9, "IotDeviceSetupDlg.Remove.actionPerformed e=" + e.toString());
             }
         });
 
@@ -156,7 +157,7 @@ public class IotDeviceSetupDlg extends JDialog {
         bConfigure.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dbg.println(9, "IotDeviceSetupDlg.Configure.actionPerformed" + e.toString());
+                dbg.println(9, "IotDeviceSetupDlg.Configure.actionPerformed e=" + e.toString());
                 configureHandler();
             }
         });
@@ -178,7 +179,7 @@ public class IotDeviceSetupDlg extends JDialog {
         bCancel.setHorizontalAlignment(SwingConstants.RIGHT);
         bCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                dbg.println(9, "IotDeviceSetupDlg.Cancel.actionPerformed" + e.toString());
+                dbg.println(9, "IotDeviceSetupDlg.Cancel.actionPerformed e=" + e.toString());
                 setVisible(false);
             }
         });
@@ -298,6 +299,8 @@ public class IotDeviceSetupDlg extends JDialog {
     private IotDeviceTable devicesActivated;
     private JButton bRemove;
     private JButton bConfigure;
+
+    public static IotDeviceSetupDlg idsd;
 
     private static final long serialVersionUID = 8080722709719513891L;
 }
