@@ -156,14 +156,19 @@ public class IotTerminalMain extends javax.swing.JFrame {
     }
 
     protected void m_MeasStartActionPerformed(ActionEvent evt) {
-        dbg.println(9, "m_MeasStartActionPerformed");
+        dbg.println(9, "IotTerminalMain.m_MeasStartActionPerformed");
         if (IotActivatedDriverList.size() > 0)
             try {
                 IotActivatedDriverList.start();
                 m_MeasStart.setEnabled(false);
                 m_MeasStop.setEnabled(true);
             }catch(Exception e) {
+                dbg.println(9, "IotTerminalMain.m_MeasStartActionPerformed e=" + e.toString());
                 IotActivatedDriverList.stop();
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Unable to start measurement!\nDetailed info: " + e.toString(),
+                        "Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
             }
     }
 
