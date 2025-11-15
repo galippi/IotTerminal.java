@@ -19,12 +19,13 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
+
 
 import iotDriver.IotActivatedDriverList;
-import iotDriver.IotAvailableDriverList;
 import iotDriver.IotDriverBase;
 import lippiWare.utils.dbg;
 
@@ -61,7 +62,7 @@ class IotDeviceTable extends JPanel {
         }
     }
 
-    private JTable table;
+    JTable table;
 
     static final String[] columnNames = new String[] {
             "Device name", "Number of configured channels"
@@ -105,14 +106,24 @@ public class IotDeviceSetupDlg extends JDialog {
         parent = _parent;
         this.setTitle("Device setup");
 
-        scrollableTable = new IotDeviceTable();
+        devicesActivated = new IotDeviceTable();
+        devicesActivated.table.getSelectionModel().addListSelectionListener(
+                new ListSelectionListener (){
+                    @Override
+                    public void valueChanged(ListSelectionEvent evt)
+                    {
+                        dbg.println(9, "IotDeviceSetupDlg.ListSelectionListener" + evt.toString());
+                        updateButtons();
+                    }
+            });
+
 
         IotChannelsTable channelsPanel = new IotChannelsTable();
         //channelsPanel.setMinimumSize(new Dimension(350, 200));
         JScrollPane channelsPane = new JScrollPane(channelsPanel);
         channelsPane.setMinimumSize(new Dimension(350, 200));
 
-        jsp = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scrollableTable , channelsPane);
+        jsp = new JSplitPane(JSplitPane.VERTICAL_SPLIT, devicesActivated , channelsPane);
         jsp.setDividerLocation(IotTerminalPrefs.get("DeviceSetupVerticalSplit", 200));
         JPanel horizontalSplit = new JPanel(new BorderLayout());
         horizontalSplit.add(jsp);
@@ -129,19 +140,21 @@ public class IotDeviceSetupDlg extends JDialog {
             }
         });
 
-        JButton bRemove = new JButton("Remove");
+        bRemove = new JButton("Remove");
         bRemove.setHorizontalAlignment(SwingConstants.LEFT);
         bRemove.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                dbg.println(9, "IotDeviceSetupDlg.Remove.actionPerformed" + e.toString());
             }
         });
 
-        JButton bConfigure = new JButton("Configure");
+        bConfigure = new JButton("Configure");
         bConfigure.setHorizontalAlignment(SwingConstants.LEFT);
         bConfigure.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                dbg.println(9, "IotDeviceSetupDlg.Configure.actionPerformed" + e.toString());
             }
         });
 
@@ -162,6 +175,7 @@ public class IotDeviceSetupDlg extends JDialog {
         bCancel.setHorizontalAlignment(SwingConstants.RIGHT);
         bCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                dbg.println(9, "IotDeviceSetupDlg.Cancel.actionPerformed" + e.toString());
                 setVisible(false);
             }
         });
@@ -220,17 +234,28 @@ public class IotDeviceSetupDlg extends JDialog {
     }
 
     private void fillRowData() {
-        // TODO Auto-generated method stub
-        
+        devicesActivated.fillRowData();
     }
 
     private void updateButtons() {
-        // TODO Auto-generated method stub
-        
+        dbg.println(9, "IotDeviceSetupDlg.updateButtons");
+        int[] rowIdxs = devicesActivated.table.getSelectedRows();
+        if (rowIdxs.length == 1) {
+            bRemove.setEnabled(true);
+            bConfigure.setEnabled(true);
+        }else
+        if (rowIdxs.length > 0) {
+            bRemove.setEnabled(true);
+            bConfigure.setEnabled(false);
+        }else
+        {
+            bRemove.setEnabled(false);
+            bConfigure.setEnabled(false);
+        }
     }
 
     protected void okHandler() {
-        dbg.println(9, "ChannelSelectorDialog.okHandler");
+        dbg.println(9, "IotDeviceSetupDlg.okHandler");
         setVisible(false);
 
         IotTerminalPrefs.put("DeviceSetupDialogX", getX());
@@ -241,18 +266,21 @@ public class IotDeviceSetupDlg extends JDialog {
     }
 
     protected void addHandler() {
+        dbg.println(9, "IotDeviceSetupDlg.addHandler");
         IotActivateDriver iad = new IotActivateDriver(this);
         iad.setVisible(true);
     }
 
     public void updateDeviceList() {
         //fillRowData();
-        scrollableTable.fillRowData();
+        devicesActivated.fillRowData();
     }
 
     IotTerminalMain parent;
     JSplitPane jsp;
-    private IotDeviceTable scrollableTable;
+    private IotDeviceTable devicesActivated;
+    private JButton bRemove;
+    private JButton bConfigure;
 
     private static final long serialVersionUID = 8080722709719513891L;
 }

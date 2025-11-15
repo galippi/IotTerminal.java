@@ -1,15 +1,12 @@
 package IotTerminal;
 
-import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -18,11 +15,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 
 import iotDriver.IotActivatedDriverList;
 import iotDriver.IotAvailableDriverList;
 import iotDriver.IotDriverBase;
+import lippiWare.utils.dbg;
 
 class IotAvailableDriversTable extends JTable {
 
@@ -48,6 +48,21 @@ class IotAvailableDriversTable extends JTable {
             setValueAt(driver.getName(), i, colName);
             setValueAt("" + driver.getSubchannelNumber(), i, colChannelsNumber);
         }
+        if (IotAvailableDriverList.size() > 0)
+            this.setRowSelectionInterval(0, 0);
+        getSelectionModel().addListSelectionListener(
+                new ListSelectionListener (){
+                    @Override
+                    public void valueChanged(ListSelectionEvent evt)
+                    {
+                        listSelectionIsChanged(evt);
+                    }
+            });
+
+    }
+
+    private void listSelectionIsChanged(ListSelectionEvent evt) {
+        dbg.println(9, "IotAvailableDriversTable.listSelectionIsChanged evt=" + evt.toString());
     }
 
     final String[] columnNames = new String[] {
@@ -76,6 +91,7 @@ public class IotActivateDriver extends JDialog {
         bAdd.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                dbg.println(9, "IotActivateDriver.add.actionPerformed e=" + e.toString());
                 addHandler();
             }
         });
@@ -84,6 +100,7 @@ public class IotActivateDriver extends JDialog {
         bCancel.setHorizontalAlignment(SwingConstants.RIGHT);
         bCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                dbg.println(9, "IotActivateDriver.cancel.actionPerformed e=" + e.toString());
                 setVisible(false);
             }
         });
@@ -113,6 +130,7 @@ public class IotActivateDriver extends JDialog {
     }
 
     private void addHandler() { // TODO:
+        dbg.println(9, "IotActivateDriver.addHandler " + table.getSelectedRow());
         setVisible(false);
         int[] selectedRows = table.getSelectedRows();
         if (selectedRows.length > 0) {
