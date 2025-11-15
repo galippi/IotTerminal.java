@@ -49,4 +49,10 @@ public class IotDriverSlcanUdp implements IotDriverBase {
         return "Slcan UDP";
     }
 
+    @Override
+    public IotDriverBaseConfigDlg getConfigDlg() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

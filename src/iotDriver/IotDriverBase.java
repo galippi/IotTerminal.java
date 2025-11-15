@@ -11,4 +11,5 @@ public interface IotDriverBase {
     void checkConfig(final Vector<IotDriverBase> driverList);
     IotDriverBase create();
     String getName();
+    IotDriverBaseConfigDlg getConfigDlg();
 }

@@ -49,4 +49,9 @@ public class IotDriverSlcanSerial implements IotDriverBase {
         return "Slcan Serial";
     }
 
+    @Override
+    public IotDriverBaseConfigDlg getConfigDlg() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

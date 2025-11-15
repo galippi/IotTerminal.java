@@ -27,6 +27,7 @@ import javax.swing.table.TableColumn;
 
 import iotDriver.IotActivatedDriverList;
 import iotDriver.IotDriverBase;
+import iotDriver.IotDriverBaseConfigDlg;
 import lippiWare.utils.dbg;
 
 class IotDeviceTable extends JPanel {
@@ -112,8 +113,9 @@ public class IotDeviceSetupDlg extends JDialog {
                     @Override
                     public void valueChanged(ListSelectionEvent evt)
                     {
-                        dbg.println(9, "IotDeviceSetupDlg.ListSelectionListener" + evt.toString());
-                        updateButtons();
+                        dbg.println(9, "IotDeviceSetupDlg.ListSelectionListener evt=" + evt.toString());
+                        if (!evt.getValueIsAdjusting())
+                            updateButtons();
                     }
             });
 
@@ -155,6 +157,7 @@ public class IotDeviceSetupDlg extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dbg.println(9, "IotDeviceSetupDlg.Configure.actionPerformed" + e.toString());
+                configureHandler();
             }
         });
 
@@ -242,7 +245,10 @@ public class IotDeviceSetupDlg extends JDialog {
         int[] rowIdxs = devicesActivated.table.getSelectedRows();
         if (rowIdxs.length == 1) {
             bRemove.setEnabled(true);
-            bConfigure.setEnabled(true);
+            if (IotActivatedDriverList.get(rowIdxs[0]).getConfigDlg() != null)
+                bConfigure.setEnabled(true);
+            else
+                bConfigure.setEnabled(false);
         }else
         if (rowIdxs.length > 0) {
             bRemove.setEnabled(true);
@@ -274,6 +280,17 @@ public class IotDeviceSetupDlg extends JDialog {
     public void updateDeviceList() {
         //fillRowData();
         devicesActivated.fillRowData();
+    }
+
+    private void configureHandler() {
+        dbg.println(9, "IotDeviceSetupDlg.configureHandler");
+        int[] rowIdxs = devicesActivated.table.getSelectedRows();
+        if (rowIdxs.length == 1) {
+            IotDriverBaseConfigDlg dlg = IotActivatedDriverList.get(rowIdxs[0]).getConfigDlg();
+            if (dlg != null) {
+                dlg.setVisible(true);
+            }
+        }
     }
 
     IotTerminalMain parent;
