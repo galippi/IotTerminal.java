@@ -218,6 +218,8 @@ public class IotTerminalMain extends javax.swing.JFrame {
             JSONTokener tokener = new JSONTokener(is);
             JSONObject jsonObject = new JSONObject(tokener);
             IotActivatedDriverList.setJson(jsonObject);
+            this.setTitle("IotTerminal - " + fileName);
+            measConfigFilename = fileName;
         } catch (Exception e) {
             String errorMsg = "IotTerminalMain.openSetupFile - unable to open or load file " + fileName + "!\ne=" + e.toString() + "\n";
             dbg.println(1, errorMsg);
@@ -249,7 +251,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
             myWriter.close();
             dbg.dprintf(9, "IotTerminalMain.saveSetupFile(%s) done!\n", filename);
             measConfigFilename = filename;
-            this.setTitle("IotTerminal" + filename);
+            this.setTitle("IotTerminal - " + filename);
         } catch (Exception e) {
             dbg.dprintf(1, "IotTerminalMain.saveSetupFile exception (%s) e=%s!\n", filename, e.toString());
             javax.swing.JOptionPane.showMessageDialog(this,
