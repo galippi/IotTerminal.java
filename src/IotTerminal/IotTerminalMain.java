@@ -11,6 +11,7 @@ import config.DbgConfig;
 import iotDriver.IotActivatedDriverList;
 import iotDriver.IotAvailableDriverList;
 import iotDriver.IotDriverSlcanSerial;
+import iotDriver.IotDriverSlcanUdp;
 import lippiWare.utils.dbg;
 import version.VersionInfo;
 
@@ -49,6 +50,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 IotAvailableDriverList.add(new IotDriverSlcanSerial());
+                IotAvailableDriverList.add(new IotDriverSlcanUdp());
                 frame = new IotTerminalMain();
                 frame.setVisible(true);
             // ------------------------------------------------------------
