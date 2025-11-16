@@ -164,7 +164,7 @@ public class IotDeviceSetupDlg extends JDialog {
             }
         });
 
-        JButton bCheck = new JButton("Check config");
+        bCheck = new JButton("Check config");
         bCheck.setHorizontalAlignment(SwingConstants.LEFT);
         bCheck.addActionListener(new ActionListener() {
             @Override
@@ -234,8 +234,9 @@ public class IotDeviceSetupDlg extends JDialog {
 
         addEscapeListener();
         fillRowData();
+        if (devicesActivated.table.getRowCount() > 0)
+            devicesActivated.table.setRowSelectionInterval(0, 0);
         updateButtons();
-
     }
 
     void addEscapeListener() {
@@ -263,14 +264,17 @@ public class IotDeviceSetupDlg extends JDialog {
                 bConfigure.setEnabled(true);
             else
                 bConfigure.setEnabled(false);
+            bCheck.setEnabled(true);
         }else
         if (rowIdxs.length > 0) {
             bRemove.setEnabled(true);
             bConfigure.setEnabled(false);
+            bCheck.setEnabled(false);
         }else
         {
             bRemove.setEnabled(false);
             bConfigure.setEnabled(false);
+            bCheck.setEnabled(false);
         }
     }
 
@@ -323,6 +327,7 @@ public class IotDeviceSetupDlg extends JDialog {
     private IotDeviceTable devicesActivated;
     private JButton bRemove;
     private JButton bConfigure;
+    private JButton bCheck;
 
     public static IotDeviceSetupDlg idsd;
 
