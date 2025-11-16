@@ -14,4 +14,5 @@ public interface IotDriverBase {
     IotDriverBaseConfigDlg getConfigDlg();
     String getConfig();
     void setConfig(String config) throws Exception;
+    String checkDevice();
 }

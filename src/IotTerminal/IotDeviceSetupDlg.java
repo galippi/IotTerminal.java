@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -24,6 +25,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
+import gnu.io.*;
 
 import iotDriver.IotActivatedDriverList;
 import iotDriver.IotDriverBase;
@@ -162,9 +164,20 @@ public class IotDeviceSetupDlg extends JDialog {
             }
         });
 
+        JButton bCheck = new JButton("Check config");
+        bCheck.setHorizontalAlignment(SwingConstants.LEFT);
+        bCheck.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dbg.println(9, "IotDeviceSetupDlg.Check config.actionPerformed e=" + e.toString());
+                checkDevice();
+            }
+        });
+
         buttons.add(bAdd);
         buttons.add(bRemove);
         buttons.add(bConfigure);
+        buttons.add(bCheck);
 
         JButton bOk = new JButton("OK");
         bOk.setHorizontalAlignment(SwingConstants.LEFT);
@@ -292,6 +305,17 @@ public class IotDeviceSetupDlg extends JDialog {
                 dlg.setVisible(true);
             }
         }
+    }
+
+    protected void checkDevice() {
+        dbg.println(9, "IotDeviceSetupDlg.checkDevice");
+        int[] rowIdxs = devicesActivated.table.getSelectedRows();
+        if (rowIdxs.length != 1) {
+            return; // not valid selection
+        }
+        IotDriverBase device = IotActivatedDriverList.get(rowIdxs[0]);
+        String response = device.checkDevice();
+        JOptionPane.showMessageDialog(parent, "Device response: " + response);
     }
 
     IotTerminalMain parent;

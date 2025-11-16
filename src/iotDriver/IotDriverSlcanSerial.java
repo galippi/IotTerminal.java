@@ -17,6 +17,8 @@ import javax.swing.SwingConstants;
 
 import IotTerminal.IotDeviceSetupDlg;
 import IotTerminal.IotTerminalPrefs;
+import gnu.io.CommPortIdentifier;
+import gnu.io.SerialPort;
 import iotDataConnection.IotComPort;
 import lippiWare.utils.dbg;
 
@@ -239,6 +241,41 @@ public class IotDriverSlcanSerial implements IotDriverBase {
             String msg = "IotDriverSlcanSerial.setConfig - wrong CAN baud name=" + getName() + " canBaud=" + configArray[2] + " e=" + e.toString();
             dbg.println(9, msg);
             throw new Exception(msg);
+        }
+    }
+
+    @Override
+    public String checkDevice() {
+        try
+        {
+            CommPortIdentifier portId =
+                    CommPortIdentifier.getPortIdentifier(portName);
+            SerialPort serialPort = (SerialPort) portId.open("IOT", 5000);
+            serialPort.setSerialPortParams(
+                baud,
+                SerialPort.DATABITS_8,
+                SerialPort.STOPBITS_1,
+                SerialPort.PARITY_NONE);
+          dbg.println(19, "IotSlcanConfigDlg.checkDevice Before setFlowControlMode");
+          serialPort.setFlowControlMode(
+                      SerialPort.FLOWCONTROL_NONE);
+          dbg.println(19, "IotSlcanConfigDlg.checkDevice After setFlowControlMode");
+          java.io.OutputStream outStream = serialPort.getOutputStream();
+          java.io.InputStream inStream = serialPort.getInputStream();
+          outStream.write("V\n".getBytes());
+          Thread.sleep(1000);
+          byte[] response = new byte[2048];
+          int len = inStream.read(response);
+          outStream.close();
+          inStream.close();
+          serialPort.close();
+          String responseStr = new String(response, 0, len);
+          dbg.println(9, "IotSlcanConfigDlg.checkDevice len=" + len + " respone=" + responseStr);
+          return responseStr;
+        }catch (Exception e) {
+            String errorMsg = "IotSlcanConfigDlg.checkDevice - exception e=" + e.toString();
+            dbg.println(3, errorMsg);
+            return errorMsg;
         }
     }
 
