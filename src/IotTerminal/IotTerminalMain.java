@@ -247,7 +247,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
         try {
             FileWriter myWriter = new FileWriter(filename);
             JSONObject jsonObject = IotActivatedDriverList.getJson();
-            myWriter.write(jsonObject.toString());
+            myWriter.write(jsonObject.toString(2));
             myWriter.close();
             dbg.dprintf(9, "IotTerminalMain.saveSetupFile(%s) done!\n", filename);
             measConfigFilename = filename;
