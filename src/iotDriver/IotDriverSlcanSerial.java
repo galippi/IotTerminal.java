@@ -179,7 +179,7 @@ class IotSlcanConfigDlg extends IotDriverBaseConfigDlg {
     private static final long serialVersionUID = 9090788248731657889L;
 }
 
-public class IotDriverSlcanSerial implements IotDriverBase {
+public class IotDriverSlcanSerial extends IotDriverBase {
 
     @Override
     public int getSubchannelNumber() {

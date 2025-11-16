@@ -2,7 +2,7 @@ package iotDriver;
 
 import java.util.Vector;
 
-public class IotDriverSlcanUdp implements IotDriverBase {
+public class IotDriverSlcanUdp extends IotDriverBase {
 
     @Override
     public int getSubchannelNumber() {
