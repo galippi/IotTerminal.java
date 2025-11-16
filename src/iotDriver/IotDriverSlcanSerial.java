@@ -5,14 +5,17 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
 import IotTerminal.IotDeviceSetupDlg;
@@ -99,6 +102,21 @@ class IotSlcanConfigDlg extends IotDriverBaseConfigDlg {
         setLocation(IotTerminalPrefs.get("IotSlcanConfigDlgX", 0), IotTerminalPrefs.get("IotSlcanConfigDlgY", 0));
         setSize(IotTerminalPrefs.get("IotSlcanConfigDlgW", 200), IotTerminalPrefs.get("IotSlcanConfigDlgH", 150));
         this.setMinimumSize(new Dimension(200, 100));
+
+        addEscapeListener();
+    }
+
+    void addEscapeListener() {
+        ActionListener escListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dbg.println(9, "IotSlcanConfigDlg.addEscapeListener.actionPerformed");
+                dispose();
+            }
+        };
+        getRootPane().registerKeyboardAction(escListener,
+              KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+              JComponent.WHEN_IN_FOCUSED_WINDOW);
     }
 
     private void okHandler() {
@@ -142,7 +160,7 @@ class IotSlcanConfigDlg extends IotDriverBaseConfigDlg {
             return;
         }
 
-        dbg.println(9, "IotSlcanConfigDlg.okHandler - valid selection comPortName=" + comPortName + " baud=" + baudVal);
+        dbg.println(9, "IotSlcanConfigDlg.okHandler - valid selection comPortName=" + comPortName + " baud=" + baudVal + " canBaudVal=" + canBaudVal);
         parent.portName = comPortName;
         parent.baud = baudVal;
         parent.canBaud = canBaudVal;
