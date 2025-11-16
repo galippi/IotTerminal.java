@@ -251,6 +251,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
         } else
         {
           dbg.println(9, "IotTerminalMain.m_FileSaveActionPerformed - Save command cancelled by user.");
+          JOptionPane.showMessageDialog(IotDeviceSetupDlg.idsd, "No config file is selected, therefore the config is not saved!", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -322,6 +323,8 @@ public class IotTerminalMain extends javax.swing.JFrame {
                         "Error",
                         javax.swing.JOptionPane.ERROR_MESSAGE);
             }
+        else
+            JOptionPane.showMessageDialog(IotDeviceSetupDlg.idsd, "No device is configured!", "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     protected void m_MeasStopActionPerformed(ActionEvent evt) {
