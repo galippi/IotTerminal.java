@@ -20,6 +20,28 @@ import IotTerminal.IotTerminalPrefs;
 import iotDataConnection.IotComPort;
 import lippiWare.utils.dbg;
 
+class SlcanCanBaudRateSupported {
+    static final int[] canBaudListInt = {125000, 250000, 500000};
+    static final int[] canBaudListOption = {4, 5, 6};
+    static final String[] canBaudListStr = {"125000", "250000", "500000"};
+
+    static int getIdx(String canBaud) {
+        for (int i = 0; i < canBaudListStr.length; i++) {
+            if (canBaudListStr[i].contentEquals(canBaud))
+                return i;
+        }
+        return -1;
+    }
+
+    static int getIdx(int canBaud) {
+        for (int i = 0; i < canBaudListInt.length; i++) {
+            if (canBaudListInt[i] == canBaud)
+                return i;
+        }
+        return -1;
+    }
+}
+
 class IotSlcanConfigDlg extends IotDriverBaseConfigDlg {
     IotSlcanConfigDlg(IotDriverSlcanSerial _parent) {
         super(IotDeviceSetupDlg.idsd, Dialog.ModalityType.APPLICATION_MODAL);
@@ -33,6 +55,10 @@ class IotSlcanConfigDlg extends IotDriverBaseConfigDlg {
 
         JLabel lbBaud = new JLabel("Baud rate:");
         tBaud = new JTextField("" + parent.baud);
+
+        JLabel lbCanBaud = new JLabel("CAN baud rate:");
+        canBaudBox = new JComboBox<>(SlcanCanBaudRateSupported.canBaudListStr);
+        canBaudBox.setSelectedItem("" + parent.canBaud);
 
         JButton bOk = new JButton("OK");
         bOk.setHorizontalAlignment(SwingConstants.LEFT);
@@ -62,9 +88,12 @@ class IotSlcanConfigDlg extends IotDriverBaseConfigDlg {
         add(box);
         add(lbBaud);
         add(tBaud);
+        add(lbCanBaud);
+        add(canBaudBox);
         add(bOkCancel);
+
         pack();
-        
+
         setLocation(IotTerminalPrefs.get("IotSlcanConfigDlgX", 0), IotTerminalPrefs.get("IotSlcanConfigDlgY", 0));
         setSize(IotTerminalPrefs.get("IotSlcanConfigDlgW", 200), IotTerminalPrefs.get("IotSlcanConfigDlgH", 150));
         this.setMinimumSize(new Dimension(200, 100));
@@ -88,8 +117,20 @@ class IotSlcanConfigDlg extends IotDriverBaseConfigDlg {
             if ((baudVal < 100) || (baudVal > 999999))
                 throw new Exception("Invalid baud rate value " + baud + "!");
         }catch(Exception e) {
-            dbg.println(9, "IotSlcanConfigDlg.okHandler - not valid selection comPortName=" + comPortName);
+            dbg.println(9, "IotSlcanConfigDlg.okHandler - not valid selection com Port baud=" + baud);
             errorMsg = "Not valid baud rate value=" + baud;
+        }
+
+        String canBaudStr = (String)canBaudBox.getSelectedItem();
+        int canBaudVal = -1;
+        try {
+            canBaudVal = Integer.parseInt(canBaudStr);
+            int canBaudIdx = SlcanCanBaudRateSupported.getIdx(canBaudVal);
+            if (canBaudIdx < 0)
+                throw new Exception("Invalid CAN baud rate value " + canBaudStr + "!");
+        }catch(Exception e) {
+            dbg.println(9, "IotSlcanConfigDlg.okHandler - not valid selection CAN baud=" + canBaudStr);
+            errorMsg = "Not valid CAN baud rate value=" + canBaudStr;
         }
 
         if (errorMsg != null) {
@@ -102,6 +143,7 @@ class IotSlcanConfigDlg extends IotDriverBaseConfigDlg {
         dbg.println(9, "IotSlcanConfigDlg.okHandler - valid selection comPortName=" + comPortName + " baud=" + baudVal);
         parent.portName = comPortName;
         parent.baud = baudVal;
+        parent.canBaud = canBaudVal;
 
         IotTerminalPrefs.put("IotSlcanConfigDlgX", getX());
         IotTerminalPrefs.put("IotSlcanConfigDlgY", getY());
@@ -111,6 +153,7 @@ class IotSlcanConfigDlg extends IotDriverBaseConfigDlg {
 
     IotDriverSlcanSerial parent;
     private JComboBox<String> box;
+    private JComboBox<String> canBaudBox;
     private JTextField tBaud;
 
     private static final long serialVersionUID = 9090788248731657889L;
@@ -171,13 +214,13 @@ public class IotDriverSlcanSerial implements IotDriverBase {
 
     @Override
     public String getConfig() {
-        return portName + ";" + baud;
+        return portName + ";" + baud + ";" + canBaud;
     }
 
     @Override
     public void setConfig(String configStr) throws Exception {
         String[] configArray = configStr.split(";");
-        if (configArray.length != 2) {
+        if (configArray.length != 3) {
             String msg = "IotDriverSlcanSerial.setConfig - number of parameters are wrong name=" + getName() + " configStr=" + configStr;
             dbg.println(9, msg);
             throw new Exception(msg);
@@ -190,9 +233,17 @@ public class IotDriverSlcanSerial implements IotDriverBase {
             dbg.println(9, msg);
             throw new Exception(msg);
         }
+        try {
+            canBaud = Integer.parseUnsignedInt(configArray[2]);
+        }catch (Exception e) {
+            String msg = "IotDriverSlcanSerial.setConfig - wrong CAN baud name=" + getName() + " canBaud=" + configArray[2] + " e=" + e.toString();
+            dbg.println(9, msg);
+            throw new Exception(msg);
+        }
     }
 
     String portName;
     int baud = 1200;
+    int canBaud = 250000;
     IotDriverBaseConfigDlg dlg;
 }
