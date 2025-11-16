@@ -25,8 +25,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
-import gnu.io.*;
-
 import iotDriver.IotActivatedDriverList;
 import iotDriver.IotDriverBase;
 import iotDriver.IotDriverBaseConfigDlg;
