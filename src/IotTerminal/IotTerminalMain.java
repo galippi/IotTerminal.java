@@ -118,6 +118,17 @@ public class IotTerminalMain extends javax.swing.JFrame {
           });
         jMenuFile.add(m_FileSaveAs);
 
+        jMenuFile.add(new javax.swing.JPopupMenu.Separator());
+
+        javax.swing.JMenu jMenuRecentFiles = new javax.swing.JMenu();
+        jMenuRecentFiles.setText("Recent Files");
+        jMenuRecentFiles.setToolTipText("");
+        jMenuRecentFiles.setActionCommand("recentFiles");
+        fillRecentFiles(jMenuRecentFiles);
+        jMenuFile.add(jMenuRecentFiles);
+
+        jMenuFile.add(new javax.swing.JPopupMenu.Separator());
+
         JMenuItem m_FileExit = new javax.swing.JMenuItem("Exit");
         m_FileExit.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_DOWN_MASK));
         m_FileExit.addActionListener(new java.awt.event.ActionListener() {
@@ -220,6 +231,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
             IotActivatedDriverList.setJson(jsonObject);
             this.setTitle("IotTerminal - " + fileName);
             measConfigFilename = fileName;
+            updateRecentFileList(fileName);
         } catch (Exception e) {
             String errorMsg = "IotTerminalMain.openSetupFile - unable to open or load file " + fileName + "!\ne=" + e.toString() + "\n";
             dbg.println(1, errorMsg);
@@ -327,6 +339,58 @@ public class IotTerminalMain extends javax.swing.JFrame {
 
     public void addLog(String msg) {
         mainPanel.addLog(msg);
+    }
+
+    private void fillRecentFiles(JMenu jMenuRecentFiles) {
+        int nextRecentFile = 0;
+        for (int i = 0; i < 10; i++)
+        {
+          String val = IotTerminalPrefs.getRecentFile(i, "");
+          if (!val.isEmpty())
+          {
+            javax.swing.JMenuItem jMenuItem = new javax.swing.JMenuItem();
+            jMenuItem.setText(nextRecentFile + ": " + val);
+            nextRecentFile++;
+            jMenuItem.addActionListener(new java.awt.event.ActionListener() {
+              public void actionPerformed(java.awt.event.ActionEvent evt) {
+                m_RecentFileActionPerformed(evt);
+              }
+            });
+            jMenuRecentFiles.add(jMenuItem);
+          }
+        }
+    }
+
+    protected void m_RecentFileActionPerformed(ActionEvent evt) {
+        dbg.println(9, "m_RecentFileActionPerformed " + evt.toString());
+        String val = evt.getActionCommand();
+        dbg.dprintf(9, "  val=%s\n", val);
+        if (val.charAt(1) == ':')
+        {
+          int idx = val.charAt(0) - '0';
+          String file = val.substring(3);
+          dbg.dprintf(9, "  idx=%d file=%s\n", idx, file);
+          openSetupFile(file);
+        }
+    }
+    
+    void updateRecentFileList(String fileName) {
+        int i;
+        for (i = 0; i < 10; i++)
+        { /* check the existence of the file on the recent list */
+            if (fileName.equals(IotTerminalPrefs.getRecentFile(i, "")))
+            { // the file is already on the recent list -> move it to the first position
+                break;
+            }
+        }
+        if (i != 0)
+        {
+            for (; i > 0; i--)
+            { /* move recent file lower */
+                IotTerminalPrefs.putRecentFile(i, IotTerminalPrefs.getRecentFile(i - 1, ""));
+            }
+            IotTerminalPrefs.putRecentFile(0, fileName);
+        }
     }
 
     public void windowClose(java.awt.event.WindowEvent e)
