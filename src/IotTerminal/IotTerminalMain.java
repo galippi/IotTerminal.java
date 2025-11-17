@@ -12,6 +12,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -273,6 +274,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
             dbg.dprintf(9, "IotTerminalMain.saveSetupFile(%s) done!\n", filename);
             measConfigFilename = filename;
             this.setTitle("IotTerminal - " + filename);
+            updateRecentFileList(filename);
             m_FileSave.setEnabled(true);
         } catch (Exception e) {
             dbg.dprintf(1, "IotTerminalMain.saveSetupFile exception (%s) e=%s!\n", filename, e.toString());
@@ -293,11 +295,34 @@ public class IotTerminalMain extends javax.swing.JFrame {
                 new javax.swing.filechooser.FileNameExtensionFilter(
                     "IOT measurement setup file", "json"));
 
-        int returnVal = fc.showOpenDialog(this);
+        String lastFileName = IotTerminalPrefs.getRecentFile(0, null);
+        if (lastFileName != null) {
+            File file = new File(lastFileName);
+            fc.setCurrentDirectory(file.getParentFile());
+        }
+
+        int returnVal = fc.showDialog(this, "Save as");
         if (returnVal == JFileChooser.APPROVE_OPTION)
         {
           java.io.File file = fc.getSelectedFile();
           dbg.println(9, "IotTerminalMain.m_FileSaveActionPerformed saving: " + file.getName() + ".");
+          try {
+              FileNameExtensionFilter ff = (FileNameExtensionFilter)fc.getFileFilter();
+              String defaultExt = ff.getExtensions()[0];
+              String filename = file.getPath();
+              int idxDot = filename.lastIndexOf('.');
+              if (idxDot >= 0) {
+                  String ext = filename.substring(idxDot + 1);
+                  if (!ext.equalsIgnoreCase(defaultExt))
+                      idxDot = -1;
+              }
+              if (idxDot < 0) {
+                  filename = filename + '.' + defaultExt;
+                  file = new File(filename);
+              }
+          }catch (Exception e) { // no file type is selected
+              dbg.println(9, "IotTerminalMain.m_FileSaveAsActionPerformed FileNameExtensionFilter exception e=" + e.toString());
+          }
           if (file.exists()) {
               int answer = JOptionPane.showConfirmDialog(
                       this,
