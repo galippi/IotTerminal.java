@@ -121,7 +121,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
 
         jMenuFile.add(new javax.swing.JPopupMenu.Separator());
 
-        javax.swing.JMenu jMenuRecentFiles = new javax.swing.JMenu();
+        jMenuRecentFiles = new javax.swing.JMenu();
         jMenuRecentFiles.setText("Recent Files");
         jMenuRecentFiles.setToolTipText("");
         jMenuRecentFiles.setActionCommand("recentFiles");
@@ -348,6 +348,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
     }
 
     private void fillRecentFiles(JMenu jMenuRecentFiles) {
+        jMenuRecentFiles.removeAll();
         int nextRecentFile = 0;
         for (int i = 0; i < 10; i++)
         {
@@ -396,6 +397,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
                 IotTerminalPrefs.putRecentFile(i, IotTerminalPrefs.getRecentFile(i - 1, ""));
             }
             IotTerminalPrefs.putRecentFile(0, fileName);
+            fillRecentFiles(jMenuRecentFiles);
         }
     }
 
@@ -434,6 +436,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
     static IotTerminalMain frame;
     IotTerminalMainPanel mainPanel;
     private JMenuItem m_FileSave;
+    private JMenu jMenuRecentFiles;
     static JMenuItem m_MeasStart;
     static JMenuItem m_MeasStop;
 
