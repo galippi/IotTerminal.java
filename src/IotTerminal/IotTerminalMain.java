@@ -2,6 +2,7 @@ package IotTerminal;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
@@ -211,6 +212,11 @@ public class IotTerminalMain extends javax.swing.JFrame {
                 new javax.swing.filechooser.FileNameExtensionFilter(
                     "IOT measurement setup file", "json"));
 
+        String lastFileName = IotTerminalPrefs.getRecentFile(0, null);
+        if (lastFileName != null) {
+            File file = new File(lastFileName);
+            fc.setCurrentDirectory(file.getParentFile());
+        }
         int returnVal = fc.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION)
         {
