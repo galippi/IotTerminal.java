@@ -100,13 +100,14 @@ public class IotTerminalMain extends javax.swing.JFrame {
           });
         jMenuFile.add(m_FileOpen);
 
-        JMenuItem m_FileSave = new javax.swing.JMenuItem("Save");
+        m_FileSave = new javax.swing.JMenuItem("Save");
         m_FileSave.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         m_FileSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
               m_FileSaveActionPerformed();
             }
           });
+        m_FileSave.setEnabled(false);
         jMenuFile.add(m_FileSave);
 
         JMenuItem m_FileSaveAs = new javax.swing.JMenuItem("Save as");
@@ -232,6 +233,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
             this.setTitle("IotTerminal - " + fileName);
             measConfigFilename = fileName;
             updateRecentFileList(fileName);
+            m_FileSave.setEnabled(true);
         } catch (Exception e) {
             String errorMsg = "IotTerminalMain.openSetupFile - unable to open or load file " + fileName + "!\ne=" + e.toString() + "\n";
             dbg.println(1, errorMsg);
@@ -265,6 +267,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
             dbg.dprintf(9, "IotTerminalMain.saveSetupFile(%s) done!\n", filename);
             measConfigFilename = filename;
             this.setTitle("IotTerminal - " + filename);
+            m_FileSave.setEnabled(true);
         } catch (Exception e) {
             dbg.dprintf(1, "IotTerminalMain.saveSetupFile exception (%s) e=%s!\n", filename, e.toString());
             javax.swing.JOptionPane.showMessageDialog(this,
@@ -430,6 +433,7 @@ public class IotTerminalMain extends javax.swing.JFrame {
 
     static IotTerminalMain frame;
     IotTerminalMainPanel mainPanel;
+    private JMenuItem m_FileSave;
     static JMenuItem m_MeasStart;
     static JMenuItem m_MeasStop;
 
