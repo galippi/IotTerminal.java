@@ -17,7 +17,7 @@ del /f /Q javafiles
 %CYGWIN%\bin\bash.exe -i -c "find src -iname '*.java' ! -name DataVisualizerLayoutFile_test.java >javafiles"
 mkdir bin
 del /f /q /s *.class
-"%JAVA%\bin\javac" -Werror -d bin -cp lib/RXTXcomm/RXTXcomm.jar @javafiles
+"%JAVA%\bin\javac" -Werror -d bin -cp lib/RXTXcomm/RXTXcomm.jar;lib/json-20180813.jar @javafiles
 if %ERRORLEVEL%==0 goto link_step
 echo ERROR!
 goto end_pause
