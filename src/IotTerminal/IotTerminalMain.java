@@ -403,11 +403,13 @@ public class IotTerminalMain extends javax.swing.JFrame {
         IotDriverDataBase data;
         while ((data = dc.getData()) != null) {
             dbg.println(9, data.toString());
+            addLog(data.toString());
         }
 
         IotDriverDebugBase debug;
         while ((debug = dc.getDebug()) != null) {
             dbg.println(9, debug.msg);
+            addLog(debug.msg);
         }
     }
 
