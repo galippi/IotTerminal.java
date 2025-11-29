@@ -282,6 +282,7 @@ public class IotDriverSlcanSerial extends IotDriverBase {
             }
             inStream = null;
         }
+        serialPort.close();
     }
 
     @Override
@@ -317,7 +318,7 @@ public class IotDriverSlcanSerial extends IotDriverBase {
         {
             CommPortIdentifier portId =
                     CommPortIdentifier.getPortIdentifier(portName);
-            SerialPort serialPort = (SerialPort) portId.open("IOT", 5000);
+            serialPort = (SerialPort) portId.open("IOT", 5000);
             serialPort.setSerialPortParams(
                 baud,
                 SerialPort.DATABITS_8,
@@ -414,6 +415,7 @@ public class IotDriverSlcanSerial extends IotDriverBase {
     int canBaud = 250000;
     IotDriverBaseConfigDlg dlg;
     IotDriverDataCollector dc;
+    SerialPort serialPort;
     java.io.OutputStream outStream;
     java.io.InputStream inStream;
 }
