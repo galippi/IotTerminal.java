@@ -103,7 +103,7 @@ class IotChannelsTable extends JPanel {
     private static final long serialVersionUID = 7799538399508125604L;
 }
 
-public class IotDeviceSetupDlg extends JDialog {
+public class IotDeviceSetupDlg extends JDialog implements IotDriverBaseConfigDlgCallback {
     IotDeviceSetupDlg(IotTerminalMain _parent) {
         super(_parent, Dialog.ModalityType.APPLICATION_MODAL);
         parent = _parent;
@@ -308,9 +308,14 @@ public class IotDeviceSetupDlg extends JDialog {
         if (rowIdxs.length == 1) {
             IotDriverBaseConfigDlg dlg = IotActivatedDriverList.get(rowIdxs[0]).getConfigDlg();
             if (dlg != null) {
-                dlg.setVisible(true);
+                dlg.run(this);
             }
         }
+    }
+
+    @Override
+    public void IotDriverBaseConfigDlgCallbackOkHandler(IotDriverBase device) {
+        fillRowData();
     }
 
     protected void checkDevice() {
