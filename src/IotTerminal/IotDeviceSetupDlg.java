@@ -149,6 +149,7 @@ public class IotDeviceSetupDlg extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dbg.println(9, "IotDeviceSetupDlg.Remove.actionPerformed e=" + e.toString());
+                removeDevice();
             }
         });
 
@@ -251,6 +252,7 @@ public class IotDeviceSetupDlg extends JDialog {
 
     private void fillRowData() {
         devicesActivated.fillRowData();
+        updateButtons();
     }
 
     private void updateButtons() {
@@ -318,6 +320,17 @@ public class IotDeviceSetupDlg extends JDialog {
         IotDriverBase device = IotActivatedDriverList.get(rowIdxs[0]);
         String response = device.checkDevice();
         JOptionPane.showMessageDialog(parent, "Device response: " + response);
+    }
+
+    protected void removeDevice() {
+        dbg.println(9, "IotDeviceSetupDlg.removeDevice");
+        int[] rowIdxs = devicesActivated.table.getSelectedRows();
+        if (rowIdxs.length != 1) {
+            return; // not valid selection
+        }
+        //IotDriverBase device = IotActivatedDriverList.get(rowIdxs[0]);
+        IotActivatedDriverList.removeDevice(rowIdxs[0]);
+        fillRowData();
     }
 
     IotTerminalMain parent;

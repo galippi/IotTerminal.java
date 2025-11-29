@@ -93,5 +93,9 @@ public class IotActivatedDriverList {
         }
     }
 
+    public static void removeDevice(int idx) {
+        driverList.remove(idx);
+    }
+
     static Vector<IotDriverBase> driverList = new Vector<>();
 }
