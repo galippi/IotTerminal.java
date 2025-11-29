@@ -6,7 +6,9 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -179,7 +181,50 @@ class IotSlcanConfigDlg extends IotDriverBaseConfigDlg {
     private static final long serialVersionUID = 9090788248731657889L;
 }
 
+class IotDriverSlcanSerialProcess implements Runnable {
+    IotDriverSlcanSerialProcess(IotDriverSlcanSerial parent) {
+        this.parent = parent;
+        parent.dc.putDebug("IotDriverSlcanSerialProcess.ctor " + parent.portName);
+    }
+
+    @Override
+    public void run() {
+        parent.dc.putDebug("IotDriverSlcanSerialProcess.run " + parent.portName);
+        while(!toBeStopped) {
+            try {
+                int len = parent.inStream.read(response);
+                if (len > 0) {
+                    String msg = parent.portName + ": " + len + "-> "+ new String(response, 0, len);
+                    parent.dc.putDebug(msg);
+                    //Todo: response to be processed
+                }
+                String msg;
+                while ((msg = messages.poll()) != null) {
+                    parent.outStream.write(msg.getBytes());
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    parent.dc.putDebug("IotDriverSlcanSerialProcess.run.sleep exception e=" + e.toString());
+                }
+            } catch (IOException e) {
+                String errorMsg = "IotDriverSlcanSerialProcess.run exception e=" + e.toString();
+                parent.dc.putDebug(errorMsg);
+            }
+        }
+        stopped = true;
+    }
+
+    IotDriverSlcanSerial parent;
+    boolean toBeStopped = false;
+    boolean stopped = false;
+    byte[] response = new byte[2048];
+    ConcurrentLinkedQueue<String> messages = new ConcurrentLinkedQueue<>();
+}
+
 public class IotDriverSlcanSerial extends IotDriverBase {
+
+    private Thread thread;
 
     @Override
     public int getSubchannelNumber() {
@@ -187,20 +232,60 @@ public class IotDriverSlcanSerial extends IotDriverBase {
     }
 
     @Override
-    public void start() throws Exception {
-        throw new Exception("IotDriverSlcanSerial - Not yet implemented portName=" + portName);
+    public void start(IotDriverDataCollector dc) throws Exception {
+        dbg.println(9, "IotDriverSlcanSerial.start port=" + portName);
+        this.dc = dc;
+        openPort();
+        int canBaudIdx = SlcanCanBaudRateSupported.getIdx(canBaud);
+        if (canBaudIdx < 0) {
+            String errorMsg = "IotDriverSlcanSerial.openPort - invalid canBaud=" + canBaud;
+            dbg.println(3, errorMsg);
+            throw new Exception(errorMsg);
+        }
+        outStream.write(("S" + SlcanCanBaudRateSupported.canBaudListOption[canBaudIdx] + "\nO\n").getBytes());
+        sp = new IotDriverSlcanSerialProcess(this);
+        thread = new Thread(sp);
+        thread.start();
     }
+    IotDriverSlcanSerialProcess sp;
 
     @Override
     public void stop() {
-        // TODO Auto-generated method stub
-        
+        dbg.println(9, "IotDriverSlcanSerial.stop port=" + portName);
+        if (sp == null)
+            return;
+        sp.toBeStopped = true;
+        while(!sp.stopped) {
+            dbg.println(3, "IotDriverSlcanSerial.stopping");
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                dbg.println(3, "IotDriverSlcanSerial.stop.sleep exception e=" + e.toString());
+            }
+        }
+        dc = null;
+        if (outStream != null) {
+            try {
+                outStream.close();
+            } catch (IOException e) {
+                dbg.println(3, "IotDriverSlcanSerial.stop - outStream.close exception e=" + e.toString());
+            }
+            outStream = null;
+        }
+        if (inStream != null) {
+            try {
+                inStream.close();
+            } catch (IOException e) {
+                dbg.println(3, "IotDriverSlcanSerial.stop - inStream.close exception e=" + e.toString());
+            }
+            inStream = null;
+        }
     }
 
     @Override
     public void close() {
-        // TODO Auto-generated method stub
-        
+        dbg.println(9, "IotDriverSlcanSerial.close port=" + portName);
+        stop();
     }
 
     @Override
@@ -223,6 +308,31 @@ public class IotDriverSlcanSerial extends IotDriverBase {
     @Override
     public String getName() {
         return "Slcan Serial";
+    }
+
+    void openPort() throws Exception {
+        try
+        {
+            CommPortIdentifier portId =
+                    CommPortIdentifier.getPortIdentifier(portName);
+            SerialPort serialPort = (SerialPort) portId.open("IOT", 5000);
+            serialPort.setSerialPortParams(
+                baud,
+                SerialPort.DATABITS_8,
+                SerialPort.STOPBITS_1,
+                SerialPort.PARITY_NONE);
+          dbg.println(19, "IotDriverSlcanSerial.openPort Before setFlowControlMode");
+          serialPort.setFlowControlMode(
+                      SerialPort.FLOWCONTROL_NONE);
+          dbg.println(19, "IotDriverSlcanSerial.openPort After setFlowControlMode");
+          outStream = serialPort.getOutputStream();
+          inStream = serialPort.getInputStream();
+          outStream.write("C\nV\n".getBytes());
+        }catch (Exception e) {
+            String errorMsg = "IotDriverSlcanSerial.openPort - exception e=" + e.toString();
+            dbg.println(3, errorMsg);
+            throw new Exception(errorMsg);
+        }
     }
 
     @Override
@@ -301,4 +411,7 @@ public class IotDriverSlcanSerial extends IotDriverBase {
     int baud = 1200;
     int canBaud = 250000;
     IotDriverBaseConfigDlg dlg;
+    IotDriverDataCollector dc;
+    java.io.OutputStream outStream;
+    java.io.InputStream inStream;
 }

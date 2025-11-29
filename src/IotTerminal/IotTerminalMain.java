@@ -2,16 +2,19 @@ package IotTerminal;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
+//import java.util.Timer;
 
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.json.JSONObject;
@@ -20,6 +23,9 @@ import org.json.JSONTokener;
 import config.DbgConfig;
 import iotDriver.IotActivatedDriverList;
 import iotDriver.IotAvailableDriverList;
+import iotDriver.IotDriverDataBase;
+import iotDriver.IotDriverDataCollector;
+import iotDriver.IotDriverDebugBase;
 import iotDriver.IotDriverSlcanSerial;
 import iotDriver.IotDriverSlcanUdp;
 import lippiWare.utils.dbg;
@@ -342,13 +348,23 @@ public class IotTerminalMain extends javax.swing.JFrame {
         }
     }
 
+    IotDriverDataCollector dc;
+
     protected void m_MeasStartActionPerformed(ActionEvent evt) {
         dbg.println(9, "IotTerminalMain.m_MeasStartActionPerformed");
+        dc = new IotDriverDataCollector();
         if (IotActivatedDriverList.size() > 0)
             try {
-                IotActivatedDriverList.start();
+                IotActivatedDriverList.start(dc);
                 m_MeasStart.setEnabled(false);
                 m_MeasStop.setEnabled(true);
+                timer = new Timer(1000, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        timerEventHandler();
+                    }});
+                timer.setRepeats(true);
+                timer.start();
             }catch(Exception e) {
                 dbg.println(9, "IotTerminalMain.m_MeasStartActionPerformed e=" + e.toString());
                 IotActivatedDriverList.stop();
@@ -361,11 +377,38 @@ public class IotTerminalMain extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(IotDeviceSetupDlg.idsd, "No device is configured!", "Error", JOptionPane.ERROR_MESSAGE);
     }
 
+    protected void timerEventHandler() {
+        dbg.println(9, "IotTerminalMain.timer.actionPerformed " + Thread.currentThread().toString());
+        if (dc == null) {
+            //timer.stop();
+        }else
+            processData(dc);
+    }
+
+    Timer timer;
+
     protected void m_MeasStopActionPerformed(ActionEvent evt) {
         dbg.println(9, "m_MeasStopActionPerformed");
         IotActivatedDriverList.stop();
         m_MeasStart.setEnabled(true);
         m_MeasStop.setEnabled(false);
+        IotDriverDataCollector dcCopy = dc;
+        timer.stop();
+        timer = null;
+        dc = null;
+        processData(dcCopy);
+    }
+
+    private void processData(IotDriverDataCollector dc) {
+        IotDriverDataBase data;
+        while ((data = dc.getData()) != null) {
+            dbg.println(9, data.toString());
+        }
+
+        IotDriverDebugBase debug;
+        while ((debug = dc.getDebug()) != null) {
+            dbg.println(9, debug.msg);
+        }
     }
 
     protected void m_DeviceSetupActionPerformed(ActionEvent evt) {

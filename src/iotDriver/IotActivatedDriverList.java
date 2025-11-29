@@ -13,10 +13,10 @@ public class IotActivatedDriverList {
         driverList.add(driver);
     }
 
-    public static void start() throws Exception {
+    public static void start(IotDriverDataCollector dc) throws Exception {
         try {
             for (IotDriverBase driver : driverList) {
-                driver.start();
+                driver.start(dc);
             }
         }catch (Exception e)
         {

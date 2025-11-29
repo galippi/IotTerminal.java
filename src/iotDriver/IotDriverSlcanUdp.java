@@ -10,7 +10,7 @@ public class IotDriverSlcanUdp extends IotDriverBase {
     }
 
     @Override
-    public void start() throws Exception {
+    public void start(IotDriverDataCollector dc) throws Exception {
         throw new Exception("IotDriverSlcanSerial - Not yet implemented!");
     }
 
