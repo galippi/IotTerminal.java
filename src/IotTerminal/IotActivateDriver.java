@@ -129,6 +129,11 @@ public class IotActivateDriver extends JDialog {
               JComponent.WHEN_IN_FOCUSED_WINDOW);
     }
 
+    public void run(IotDriverBaseConfigDlgCallback parent) {
+        caller = parent;
+        setVisible(true);
+    }
+
     private void addHandler() { // TODO:
         dbg.println(9, "IotActivateDriver.addHandler " + table.getSelectedRow());
         setVisible(false);
@@ -137,11 +142,13 @@ public class IotActivateDriver extends JDialog {
             for (int i = 0; i < selectedRows.length; i++) {
                 IotActivatedDriverList.add(IotAvailableDriverList.get(selectedRows[i]).create());
             }
-            parent.updateDeviceList();
+            //parent.updateDeviceList();
+            caller.IotDriverBaseConfigDlgCallbackOkHandler();
         }
     }
 
     IotDeviceSetupDlg parent;
+    private IotDriverBaseConfigDlgCallback caller;
     private IotAvailableDriversTable table;
 
     private static final long serialVersionUID = 2131385812160522912L;

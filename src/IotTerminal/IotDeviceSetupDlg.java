@@ -294,7 +294,8 @@ public class IotDeviceSetupDlg extends JDialog implements IotDriverBaseConfigDlg
     protected void addHandler() {
         dbg.println(9, "IotDeviceSetupDlg.addHandler");
         IotActivateDriver iad = new IotActivateDriver(this);
-        iad.setVisible(true);
+        //iad.setVisible(true);
+        iad.run(this);
     }
 
     public void updateDeviceList() {
@@ -314,7 +315,7 @@ public class IotDeviceSetupDlg extends JDialog implements IotDriverBaseConfigDlg
     }
 
     @Override
-    public void IotDriverBaseConfigDlgCallbackOkHandler(IotDriverBase device) {
+    public void IotDriverBaseConfigDlgCallbackOkHandler() {
         fillRowData();
     }
 

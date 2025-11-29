@@ -172,7 +172,7 @@ class IotSlcanConfigDlg extends IotDriverBaseConfigDlg {
         IotTerminalPrefs.put("IotSlcanConfigDlgH", getHeight());
         IotTerminalPrefs.put("IotSlcanConfigDlgW", getWidth());
 
-        caller.IotDriverBaseConfigDlgCallbackOkHandler(parent);
+        caller.IotDriverBaseConfigDlgCallbackOkHandler();
     }
 
     IotDriverSlcanSerial parent;
