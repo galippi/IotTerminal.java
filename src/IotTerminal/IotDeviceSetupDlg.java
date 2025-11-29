@@ -60,16 +60,18 @@ class IotDeviceTable extends JPanel {
             IotDriverBase driver = IotActivatedDriverList.get(i);
             table.setValueAt(driver.getName(), i, colName);
             table.setValueAt("" + driver.getSubchannelNumber(), i, colChNum);
+            table.setValueAt(driver.getConfig(), i, colChDevConfig);
         }
     }
 
     JTable table;
 
     static final String[] columnNames = new String[] {
-            "Device name", "Number of configured channels"
+            "Device name", "Number of configured channels", "Device configuration"
         };
     static final int colName = 0;
     static final int colChNum = 1;
+    static final int colChDevConfig = 2;
 
     private static final long serialVersionUID = 7799538399508125604L;
 }
