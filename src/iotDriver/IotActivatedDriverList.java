@@ -15,8 +15,10 @@ public class IotActivatedDriverList {
 
     public static void start(IotDriverDataCollector dc) throws Exception {
         try {
+            int chIdx = 0;
             for (IotDriverBase driver : driverList) {
-                driver.start(dc);
+                driver.start(dc, chIdx);
+                chIdx += driver.getSubchannelNumber();
             }
         }catch (Exception e)
         {

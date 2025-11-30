@@ -25,7 +25,12 @@ import IotTerminal.IotTerminalPrefs;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import iotDataConnection.IotComPort;
+import lippiWare.blfHandler.CanMessage;
+import lippiWare.blfHandler.VectorAscFile;
 import lippiWare.utils.dbg;
+import lwLogDataProcessor.LogDataProcessor;
+import lwLogDataProcessor.LogDataProcessorDefaultHandler;
+import lwLogDataProcessor.LogDataProcessorHandlerBase;
 
 class SlcanCanBaudRateSupported {
     static final int[] canBaudListInt = {125000, 250000, 500000};
@@ -183,10 +188,84 @@ class IotSlcanConfigDlg extends IotDriverBaseConfigDlg {
     private static final long serialVersionUID = 9090788248731657889L;
 }
 
-class IotDriverSlcanSerialProcess implements Runnable {
-    IotDriverSlcanSerialProcess(IotDriverSlcanSerial parent) {
+class IotCanMsg extends IotDriverDataBase {
+    public IotCanMsg(int chId, int id, byte[] data) {
+        super(data);
+        timeStamp_us = java.lang.System.nanoTime() / 1000;
+        msg = new CanMessage(chId, timeStamp_us * 1000, id, CanMessage.Rx, data);
+    }
+
+    public String toString() {
+        return VectorAscFile.toString(msg);
+    }
+
+    CanMessage msg;
+}
+
+interface IotCanMessageReceiver {
+    void msgProcess(IotCanMsg msg);
+}
+
+class SlcanDataProcessorStd extends LogDataProcessorHandlerBase {
+    public SlcanDataProcessorStd(IotCanMessageReceiver parent, int chIdx) {
+        super("t");
+        this.parent = parent;
+        this.chIdx = chIdx;
+    }
+
+    @Override
+    public void process(String data) throws Exception {
+        int msgId = hex2dec(data, 1, 3);
+        int dlc = hex2dec(data, 4, 1);
+        if (data.length() != (1 + 3 + 1 + dlc * 2))
+            throw new Exception("SlcanDataProcessorStd.process exception dlc error: " + dlc + "<->" + data.length() + " data=" + data + "!");
+        byte[] dataBuf = null;
+        if (dlc > 0) {
+            dataBuf = new byte[dlc];
+            hex2decArray(data, 5, dataBuf, 0, dlc);
+        }
+        IotCanMsg msg = new IotCanMsg(chIdx, msgId, dataBuf);
+        parent.msgProcess(msg);
+    }
+
+    IotCanMessageReceiver parent;
+    private int chIdx;
+}
+
+class SlcanDataProcessorExt extends LogDataProcessorHandlerBase {
+
+    public SlcanDataProcessorExt(IotCanMessageReceiver parent, int chIdx) {
+        super("T");
+        this.parent = parent;
+        this.chIdx = chIdx;
+    }
+
+    @Override
+    public void process(String data) throws Exception {
+        int msgId = hex2dec(data, 1, 8) | CanMessage.ExtId;
+        int dlc = hex2dec(data, 9, 1);
+        if (data.length() != (1 + 8 + 1 + dlc * 2))
+            throw new Exception("SlcanDataProcessorStd.process exception dlc error: " + dlc + "<->" + data.length() + " data=" + data + "!");
+        byte[] dataBuf = null;
+        if (dlc > 0) {
+            dataBuf = new byte[dlc];
+            hex2decArray(data, 10, dataBuf, 0, dlc);
+        }
+        IotCanMsg msg = new IotCanMsg(chIdx, msgId, dataBuf);
+        parent.msgProcess(msg);
+    }
+
+    IotCanMessageReceiver parent;
+    private int chIdx;
+}
+
+class IotDriverSlcanSerialProcess implements Runnable, IotCanMessageReceiver {
+    IotDriverSlcanSerialProcess(IotDriverSlcanSerial parent, int chIdx) {
         this.parent = parent;
         parent.dc.putDebug("IotDriverSlcanSerialProcess.ctor " + parent.portName);
+        ldp = new LogDataProcessor();
+        ldp.addHandler(new SlcanDataProcessorStd(this, chIdx));
+        ldp.addHandler(new SlcanDataProcessorExt(this, chIdx));
     }
 
     @Override
@@ -194,11 +273,9 @@ class IotDriverSlcanSerialProcess implements Runnable {
         parent.dc.putDebug("IotDriverSlcanSerialProcess.run " + parent.portName);
         while(!toBeStopped) {
             try {
-                int len = parent.inStream.read(response);
-                if (len > 0) {
-                    String msg = parent.portName + ": " + len + "-> "+ new String(response, 0, len);
-                    parent.dc.putDebug(msg);
-                    //Todo: response to be processed
+                int len;
+                while ((len = parent.inStream.read(response)) > 0) {
+                    slcanProcess(response, len);
                 }
                 String msg;
                 while ((msg = messages.poll()) != null) {
@@ -217,6 +294,44 @@ class IotDriverSlcanSerialProcess implements Runnable {
         stopped = true;
     }
 
+    boolean rxMessageIsInSync;
+    String rxMessageRest = "";
+
+    void slcanProcess(byte[] data, int num) {
+        String rxMessage = new String(data, 0, num);
+        String msg = parent.portName + ": " + num + "-> "+ rxMessage;
+        parent.dc.putDebug(msg);
+        //String rxMessage = new String(data, 0, num, Charset.forName("US-ASCII"));
+        //addLog(rxMessage);
+        rxMessage = rxMessage.replace('\r', '\n');
+        if (!rxMessageIsInSync) {
+            int idx = rxMessage.indexOf('\n');
+            if (idx < 0)
+                return;
+            rxMessage = rxMessage.substring(idx + 1);
+            rxMessageRest = "";
+            rxMessageIsInSync = true;
+        }
+        rxMessageRest = rxMessageRest + rxMessage;
+        int idx;
+        while ((idx = rxMessageRest.indexOf('\n')) >= 0) {
+            if (idx > 0) {
+                rxMessage = rxMessageRest.substring(0, idx);
+                dbg.println(11, "Rx:" + rxMessage);
+                ldp.process(rxMessage, defaultHandler);
+            }
+            rxMessageRest = rxMessageRest.substring(idx + 1);
+        }
+    }
+
+
+    @Override
+    public void msgProcess(IotCanMsg msg) {
+        parent.dc.putData(msg);
+    }
+
+    LogDataProcessor ldp;
+    LogDataProcessorDefaultHandler defaultHandler = new LogDataProcessorDefaultHandler();
     IotDriverSlcanSerial parent;
     boolean toBeStopped = false;
     boolean stopped = false;
@@ -234,7 +349,7 @@ public class IotDriverSlcanSerial extends IotDriverBase {
     }
 
     @Override
-    public void start(IotDriverDataCollector dc) throws Exception {
+    public void start(IotDriverDataCollector dc, int chIdx) throws Exception {
         dbg.println(9, "IotDriverSlcanSerial.start port=" + portName);
         this.dc = dc;
         openPort();
@@ -245,7 +360,7 @@ public class IotDriverSlcanSerial extends IotDriverBase {
             throw new Exception(errorMsg);
         }
         outStream.write(("S" + SlcanCanBaudRateSupported.canBaudListOption[canBaudIdx] + "\nO\n").getBytes());
-        sp = new IotDriverSlcanSerialProcess(this);
+        sp = new IotDriverSlcanSerialProcess(this, chIdx);
         thread = new Thread(sp);
         thread.start();
     }

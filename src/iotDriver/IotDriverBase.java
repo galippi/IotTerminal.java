@@ -8,7 +8,7 @@ public abstract class IotDriverBase {
         return 1;
     }
 
-    public abstract void start(IotDriverDataCollector dc) throws Exception;
+    public abstract void start(IotDriverDataCollector dc, int chIdx) throws Exception;
     public abstract void stop();
 
     public void close() {
