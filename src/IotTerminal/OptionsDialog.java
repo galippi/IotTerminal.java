@@ -103,7 +103,7 @@ class RowHandlerPortName extends RowHandler implements TableCellRenderer
 
     @Override
     void setValue(Object newValue) throws Exception {
-        comPortName = (String)((JComboBox<String>)newValue).getSelectedItem();
+        comPortName = (String)newValue;
         if ((comPortName.length() < 1) || (!IotComPort.isComPortValid(comPortName)))
             throw new Exception("Invalid COM port name (" + comPortName + ")");
     }
